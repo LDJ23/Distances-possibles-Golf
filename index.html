@@ -1,246 +1,578 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Analyse swing STM</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Analyse swing STM</title>
+  <style>
+    :root{
+      --bg1:#03101d;
+      --bg2:#071a2d;
+      --card:#0c1b2d;
+      --card2:#112844;
+      --line:rgba(255,255,255,.08);
+      --text:#eef5ff;
+      --muted:#9cb3c9;
+      --accent:#66d9ff;
+      --accent2:#7ef0a3;
+      --warn:#ffd166;
+      --danger:#ff7b7b;
+      --ok:#8ff0b3;
+      --radius:22px;
+      --shadow:0 14px 34px rgba(0,0,0,.34);
+    }
 
-<style>
-body{
-  margin:0;
-  font-family:-apple-system, BlinkMacSystemFont, sans-serif;
-  background:linear-gradient(180deg,#0a1a2f,#07121f);
-  color:white;
-}
+    *{box-sizing:border-box}
 
-.container{
-  max-width:420px;
-  margin:auto;
-  padding:20px;
-}
+    html,body{
+      margin:0;
+      padding:0;
+      background:linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      min-height:100%;
+    }
 
-h1{
-  font-size:26px;
-  margin-bottom:5px;
-}
+    body{
+      padding:14px 14px calc(22px + env(safe-area-inset-bottom));
+    }
 
-.sub{
-  font-size:14px;
-  opacity:0.7;
-  margin-bottom:20px;
-}
+    .app{
+      max-width:460px;
+      margin:0 auto;
+    }
 
-.grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:10px;
-  margin-bottom:20px;
-}
+    .panel{
+      background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));
+      border:1px solid var(--line);
+      border-radius:28px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(10px);
+    }
 
-.btn{
-  padding:10px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,0.2);
-  text-align:center;
-  cursor:pointer;
-}
+    .header{
+      padding:16px 16px 10px;
+      background:
+        radial-gradient(circle at top right, rgba(102,217,255,.15), transparent 34%),
+        radial-gradient(circle at top left, rgba(126,240,163,.12), transparent 30%);
+    }
 
-.btn.active{
-  background:#1f4fff;
-}
+    .title{
+      margin:0;
+      font-size:24px;
+      font-weight:800;
+    }
 
-.card{
-  background:rgba(255,255,255,0.05);
-  padding:15px;
-  border-radius:15px;
-  margin-bottom:15px;
-}
+    .sub{
+      margin:6px 0 0;
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.4;
+    }
 
-label{
-  display:flex;
-  justify-content:space-between;
-  font-size:14px;
-}
+    .section{
+      padding:12px 14px;
+    }
 
-input[type=range]{
-  width:100%;
-}
+    .club-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:8px;
+    }
 
-.result{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
+    .club-btn{
+      border:none;
+      border-radius:16px;
+      padding:12px 8px;
+      background:var(--card);
+      color:var(--text);
+      border:1px solid var(--line);
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+      transition:.15s ease;
+    }
 
-.big{
-  font-size:28px;
-}
+    .club-btn.active{
+      background:linear-gradient(180deg,#183452,#112844);
+      border-color:rgba(102,217,255,.45);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+    }
 
-.tip{
-  background:rgba(0,255,180,0.1);
-  padding:12px;
-  border-radius:12px;
-  font-size:14px;
-}
-</style>
+    .card{
+      background:rgba(255,255,255,.025);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:12px;
+      margin-bottom:10px;
+    }
+
+    .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin-bottom:8px;
+    }
+
+    .label{
+      font-size:14px;
+      font-weight:700;
+    }
+
+    .value{
+      font-size:15px;
+      font-weight:900;
+      color:var(--accent);
+      font-variant-numeric:tabular-nums;
+      text-align:right;
+      min-width:88px;
+    }
+
+    input[type="range"]{
+      width:100%;
+      appearance:none;
+      -webkit-appearance:none;
+      height:8px;
+      border-radius:999px;
+      background:linear-gradient(90deg,var(--accent),var(--accent2));
+      outline:none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb{
+      -webkit-appearance:none;
+      appearance:none;
+      width:26px;
+      height:26px;
+      border-radius:50%;
+      background:#fff;
+      border:3px solid #0d2238;
+      box-shadow:0 2px 12px rgba(0,0,0,.35);
+      cursor:pointer;
+    }
+
+    input[type="range"]::-moz-range-thumb{
+      width:26px;
+      height:26px;
+      border-radius:50%;
+      background:#fff;
+      border:3px solid #0d2238;
+      box-shadow:0 2px 12px rgba(0,0,0,.35);
+      cursor:pointer;
+    }
+
+    .metrics{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+    }
+
+    .metric{
+      background:linear-gradient(180deg,var(--card2),var(--card));
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:14px 10px;
+      text-align:center;
+    }
+
+    .metric-k{
+      font-size:11px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      margin-bottom:6px;
+    }
+
+    .metric-v{
+      font-size:28px;
+      font-weight:900;
+      line-height:1;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .metric-u{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:4px;
+    }
+
+    .tip{
+      border-radius:18px;
+      padding:12px;
+      line-height:1.45;
+      font-size:14px;
+      margin-bottom:10px;
+    }
+
+    .tip strong{
+      color:var(--warn);
+    }
+
+    .tip.warning{
+      background:rgba(255,209,102,.08);
+      border:1px solid rgba(255,209,102,.22);
+      color:#fff7df;
+    }
+
+    .tip.info{
+      background:rgba(102,217,255,.08);
+      border:1px solid rgba(102,217,255,.20);
+      color:#eafaff;
+    }
+
+    .tip.ok{
+      background:rgba(143,240,179,.08);
+      border:1px solid rgba(143,240,179,.20);
+      color:#edfff4;
+    }
+
+    .tip.danger{
+      background:rgba(255,123,123,.09);
+      border:1px solid rgba(255,123,123,.22);
+      color:#fff0f0;
+    }
+
+    .small{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.4;
+    }
+
+    @media (max-width:390px){
+      .club-grid{grid-template-columns:repeat(3,1fr)}
+      .metrics{grid-template-columns:1fr}
+    }
+  </style>
 </head>
-
 <body>
-<div class="container">
+  <div class="app">
+    <div class="panel">
+      <div class="header">
+        <h1 class="title">Analyse swing STM</h1>
+        <p class="sub">
+          Modèle pédagogique recalé sur des références TrackMan. Les résultats restent estimatifs, mais les ratios et les hauteurs sont maintenant beaucoup plus réalistes.
+        </p>
+      </div>
 
-<h1>Analyse swing STM</h1>
-<p class="sub">
-Modèle pédagogique : on simplifie la réalité pour comprendre l’effet de la vitesse, du lancement et du smash factor.
-</p>
+      <div class="section">
+        <div class="club-grid" id="clubGrid"></div>
+      </div>
 
-<div class="grid" id="clubs"></div>
+      <div class="section">
+        <div class="card">
+          <div class="row">
+            <div class="label">Club speed</div>
+            <div class="value" id="clubSpeedValue">76 mph</div>
+          </div>
+          <input id="clubSpeed" type="range" min="60" max="120" step="1" value="76" />
+        </div>
 
-<div class="card">
-<label>Club speed <span id="csVal">90</span> mph</label>
-<input type="range" id="cs" min="60" max="120" value="90">
-</div>
+        <div class="card">
+          <div class="row">
+            <div class="label">Ball speed</div>
+            <div class="value" id="ballSpeedValue">104 mph</div>
+          </div>
+          <input id="ballSpeed" type="range" min="80" max="185" step="1" value="104" />
+        </div>
 
-<div class="card">
-<label>Ball speed <span id="bsVal">120</span> mph</label>
-<input type="range" id="bs" min="80" max="180" value="120">
-</div>
+        <div class="card">
+          <div class="row">
+            <div class="label">VLA</div>
+            <div class="value" id="vlaValue">19.0°</div>
+          </div>
+          <input id="vla" type="range" min="5" max="30" step="0.1" value="19" />
+        </div>
+      </div>
 
-<div class="card">
-<label>VLA <span id="vlaVal">18</span>°</label>
-<input type="range" id="vla" min="5" max="30" value="18">
-</div>
+      <div class="section">
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-k">Carry</div>
+            <div class="metric-v" id="carryValue">0</div>
+            <div class="metric-u">verges</div>
+          </div>
 
-<div class="result">
-<div class="card">
-<p>Carry</p>
-<div class="big" id="carry">0</div>
-<p>verges</p>
-</div>
+          <div class="metric">
+            <div class="metric-k">Total</div>
+            <div class="metric-v" id="totalValue">0</div>
+            <div class="metric-u">verges</div>
+          </div>
 
-<div class="card">
-<p>Total</p>
-<div class="big" id="total">0</div>
-<p>verges</p>
-</div>
+          <div class="metric">
+            <div class="metric-k">Apex</div>
+            <div class="metric-v" id="apexValue">0</div>
+            <div class="metric-u">pieds</div>
+          </div>
 
-<div class="card">
-<p>Apex</p>
-<div class="big" id="apex">0</div>
-<p>pieds</p>
-</div>
+          <div class="metric">
+            <div class="metric-k">Smash</div>
+            <div class="metric-v" id="smashValue">0.00</div>
+            <div class="metric-u">ratio</div>
+          </div>
+        </div>
+      </div>
 
-<div class="card">
-<p>Smash</p>
-<div class="big" id="smash">0</div>
-</div>
-</div>
+      <div class="section">
+        <div class="tip warning" id="tipBox">
+          <strong>Conseil :</strong> Ajuste le launch pour te rapprocher de la fenêtre typique du bâton choisi.
+        </div>
 
-<div class="tip" id="msg"></div>
+        <div class="tip info" id="smashComment">
+          <strong>Lecture du smash :</strong> en attente de calcul.
+        </div>
+      </div>
 
-<div class="tip" style="margin-top:10px;">
-<strong>Important :</strong>  
-Les distances sont des estimations.  
-Le spin, le contact et l’angle d’attaque ne sont pas modélisés ici.
-</div>
+      <div class="section">
+        <div class="small">
+          Référence principale : ratios TrackMan fournis. L’apex est basé sur les hauteurs maximales typiques du tableau, converties en pieds. Les clubs 4H et 5H sont interpolés entre bois et fers pour garder ton interface complète.
+        </div>
+      </div>
+    </div>
+  </div>
 
-</div>
+  <script>
+    const clubs = [
+      {
+        key:"driver", label:"Driver",
+        clubSpeed:94, ballSpeed:140, smashIdeal:1.48, smashMax:1.52,
+        launch:13.2, spin:2611, apexYards:25, carry:218, roll:18
+      },
+      {
+        key:"3w", label:"3W",
+        clubSpeed:90, ballSpeed:132, smashIdeal:1.48, smashMax:1.51,
+        launch:11.2, spin:2704, apexYards:23, carry:195, roll:14
+      },
+      {
+        key:"7w", label:"7W",
+        clubSpeed:85, ballSpeed:123, smashIdeal:1.46, smashMax:1.49,
+        launch:12.7, spin:4693, apexYards:25, carry:174, roll:9
+      },
+      {
+        key:"4h", label:"4H",
+        clubSpeed:83, ballSpeed:120, smashIdeal:1.45, smashMax:1.48,
+        launch:13.4, spin:5000, apexYards:25, carry:171, roll:8
+      },
+      {
+        key:"5h", label:"5H",
+        clubSpeed:81, ballSpeed:117, smashIdeal:1.44, smashMax:1.47,
+        launch:14.0, spin:5200, apexYards:24, carry:166, roll:7
+      },
+      {
+        key:"4i", label:"F4",
+        clubSpeed:80, ballSpeed:116, smashIdeal:1.45, smashMax:1.47,
+        launch:14.3, spin:4801, apexYards:24, carry:169, roll:7
+      },
+      {
+        key:"5i", label:"F5",
+        clubSpeed:79, ballSpeed:112, smashIdeal:1.43, smashMax:1.45,
+        launch:14.8, spin:5081, apexYards:23, carry:161, roll:6
+      },
+      {
+        key:"6i", label:"F6",
+        clubSpeed:78, ballSpeed:109, smashIdeal:1.41, smashMax:1.43,
+        launch:17.1, spin:5943, apexYards:25, carry:152, roll:5
+      },
+      {
+        key:"7i", label:"F7",
+        clubSpeed:76, ballSpeed:104, smashIdeal:1.38, smashMax:1.40,
+        launch:19.0, spin:6699, apexYards:26, carry:141, roll:4
+      },
+      {
+        key:"8i", label:"F8",
+        clubSpeed:74, ballSpeed:100, smashIdeal:1.33, smashMax:1.35,
+        launch:20.8, spin:7494, apexYards:25, carry:130, roll:3
+      },
+      {
+        key:"9i", label:"F9",
+        clubSpeed:72, ballSpeed:93, smashIdeal:1.32, smashMax:1.34,
+        launch:23.9, spin:7589, apexYards:26, carry:119, roll:2
+      },
+      {
+        key:"pw", label:"PW",
+        clubSpeed:70, ballSpeed:86, smashIdeal:1.28, smashMax:1.30,
+        launch:25.7, spin:8403, apexYards:23, carry:107, roll:1
+      }
+    ];
 
-<script>
-const clubs = [
-  {name:"Driver", factor:2.3, ideal:1.48},
-  {name:"3W", factor:2.1, ideal:1.45},
-  {name:"7W", factor:2.0, ideal:1.43},
-  {name:"4H", factor:1.9, ideal:1.40},
-  {name:"5H", factor:1.85, ideal:1.38},
-  {name:"F4", factor:1.7, ideal:1.35},
-  {name:"F5", factor:1.6, ideal:1.33},
-  {name:"F6", factor:1.5, ideal:1.30},
-  {name:"F7", factor:1.38, ideal:1.28},
-  {name:"F8", factor:1.30, ideal:1.25},
-  {name:"F9", factor:1.25, ideal:1.23},
-  {name:"PW", factor:1.20, ideal:1.20}
-];
+    const clubGrid = document.getElementById("clubGrid");
+    const clubSpeed = document.getElementById("clubSpeed");
+    const ballSpeed = document.getElementById("ballSpeed");
+    const vla = document.getElementById("vla");
 
-let current = clubs[8];
+    const clubSpeedValue = document.getElementById("clubSpeedValue");
+    const ballSpeedValue = document.getElementById("ballSpeedValue");
+    const vlaValue = document.getElementById("vlaValue");
 
-const clubDiv = document.getElementById("clubs");
+    const carryValue = document.getElementById("carryValue");
+    const totalValue = document.getElementById("totalValue");
+    const apexValue = document.getElementById("apexValue");
+    const smashValue = document.getElementById("smashValue");
 
-clubs.forEach(c=>{
-  const b=document.createElement("div");
-  b.className="btn";
-  b.innerText=c.name;
-  b.onclick=()=>{
-    document.querySelectorAll(".btn").forEach(x=>x.classList.remove("active"));
-    b.classList.add("active");
-    current=c;
-    calc();
-  };
-  clubDiv.appendChild(b);
-});
+    const tipBox = document.getElementById("tipBox");
+    const smashComment = document.getElementById("smashComment");
 
-clubDiv.children[8].classList.add("active");
+    let selectedClub = clubs.find(c => c.key === "7i");
 
-function calc(){
-  const cs=+csInput.value;
-  const bs=+bsInput.value;
-  const vla=+vlaInput.value;
+    function renderClubs() {
+      clubGrid.innerHTML = "";
+      clubs.forEach((club) => {
+        const btn = document.createElement("button");
+        btn.className = "club-btn" + (club.key === selectedClub.key ? " active" : "");
+        btn.textContent = club.label;
+        btn.addEventListener("click", () => {
+          selectedClub = club;
+          setInputsFromClub(club);
+          renderClubs();
+          updateDisplay();
+        });
+        clubGrid.appendChild(btn);
+      });
+    }
 
-  const smash = bs/cs;
+    function setInputsFromClub(club) {
+      clubSpeed.value = Math.round(club.clubSpeed);
+      ballSpeed.value = Math.round(club.ballSpeed);
+      vla.value = club.launch.toFixed(1);
+    }
 
-  let carry = bs * current.factor;
-  carry *= 1 + (vla-15)*0.01;
+    function autoBallSpeedFromClubSpeed() {
+      const cs = Number(clubSpeed.value);
+      const suggested = Math.round(cs * selectedClub.smashIdeal);
+      ballSpeed.value = suggested;
+    }
 
-  const total = carry * 1.03;
+    function computeSmash() {
+      const cs = Number(clubSpeed.value);
+      const bs = Number(ballSpeed.value);
+      if (cs <= 0) return 0;
+      return bs / cs;
+    }
 
-  const apex = (vla * bs * 0.6);
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
 
-  carryEl.innerText = Math.round(carry);
-  totalEl.innerText = Math.round(total);
-  apexEl.innerText = Math.round(apex);
-  smashEl.innerText = smash.toFixed(2);
+    function computeCarry(bs, launch) {
+      const bsRatio = bs / selectedClub.ballSpeed;
+      const launchDelta = launch - selectedClub.launch;
 
-  let msg = "";
+      let carry = selectedClub.carry * Math.pow(bsRatio, 1.72);
 
-  if(smash > current.ideal + 0.05){
-    msg = `⚠️ Smash très élevé (${smash.toFixed(2)}).  
-👉 Possible incohérence : contact exceptionnel… ou données à valider.`;
-  }
-  else if(smash < current.ideal - 0.08){
-    msg = `❌ Smash faible (${smash.toFixed(2)}).  
-👉 Probablement perte d’énergie (contact, centrage ou spin élevé).`;
-  }
-  else{
-    msg = `✅ Smash cohérent (${smash.toFixed(2)}).  
-👉 Bonne efficacité énergétique.  
-💡 Si ta distance réelle est plus grande que celle affichée, cela suggère un spin optimisé ou une meilleure dynamique non modélisée ici.`;
-  }
+      const launchFactor = 1 - (0.0032 * Math.pow(launchDelta, 2));
+      carry *= clamp(launchFactor, 0.90, 1.03);
 
-  if(vla < 14){
-    msg += `\n\n📉 VLA bas : trajectoire tendue.`;
-  }
-  if(vla > 20){
-    msg += `\n\n📈 VLA élevé : trajectoire haute (attention au spin).`;
-  }
+      return Math.round(Math.max(20, carry));
+    }
 
-  msgEl.innerText = msg;
-}
+    function computeApexFeet(bs, launch) {
+      const bsRatio = bs / selectedClub.ballSpeed;
+      const launchDelta = launch - selectedClub.launch;
 
-const csInput = document.getElementById("cs");
-const bsInput = document.getElementById("bs");
-const vlaInput = document.getElementById("vla");
+      let apexFeet = selectedClub.apexYards * 3;
+      apexFeet *= Math.pow(bsRatio, 1.15);
+      apexFeet *= (1 + (launchDelta * 0.028));
 
-const carryEl = document.getElementById("carry");
-const totalEl = document.getElementById("total");
-const apexEl = document.getElementById("apex");
-const smashEl = document.getElementById("smash");
-const msgEl = document.getElementById("msg");
+      apexFeet = clamp(apexFeet, selectedClub.apexYards * 3 * 0.72, selectedClub.apexYards * 3 * 1.45);
 
-csInput.oninput = ()=>{csVal.innerText=csInput.value;calc();}
-bsInput.oninput = ()=>{bsVal.innerText=bsInput.value;calc();}
-vlaInput.oninput = ()=>{vlaVal.innerText=vlaInput.value;calc();}
+      return Math.round(apexFeet);
+    }
 
-calc();
-</script>
+    function computeTotal(carry, launch) {
+      const launchDelta = launch - selectedClub.launch;
 
+      let roll = selectedClub.roll;
+      roll -= launchDelta * 0.45;
+
+      roll = clamp(roll, 0, selectedClub.roll + 5);
+
+      return Math.round(carry + roll);
+    }
+
+    function buildLaunchTip(launch) {
+      const ideal = selectedClub.launch;
+      const gap = launch - ideal;
+
+      let message = "";
+      let className = "tip warning";
+
+      if (Math.abs(gap) <= 1.0) {
+        message = `Très bonne fenêtre de lancement pour ${selectedClub.label}. Tu es proche de la référence TrackMan autour de ${ideal.toFixed(1)}°.`;
+        className = "tip ok";
+      } else if (gap < -1.0) {
+        message = `Launch un peu bas pour ${selectedClub.label}. Tu es sous la référence typique de ${ideal.toFixed(1)}°.`;
+        className = "tip warning";
+      } else {
+        message = `Launch un peu haut pour ${selectedClub.label}. Tu dépasses la fenêtre typique de ${ideal.toFixed(1)}°.`;
+        className = "tip warning";
+      }
+
+      tipBox.className = className;
+      tipBox.innerHTML = `<strong>Conseil :</strong> ${message}`;
+    }
+
+    function buildSmashComment(smash) {
+      const ideal = selectedClub.smashIdeal;
+      const max = selectedClub.smashMax;
+
+      let message = "";
+      let className = "tip info";
+
+      if (smash > max) {
+        message = `Smash très élevé (${smash.toFixed(2)}) pour ${selectedClub.label}. Les données sont possiblement trop optimistes ou à valider.`;
+        className = "tip danger";
+      } else if (smash > ideal + 0.02) {
+        message = `Smash fort (${smash.toFixed(2)}). C’est possible, mais on peut questionner si le contact est exceptionnellement pur.`;
+        className = "tip warning";
+      } else if (smash >= ideal - 0.03 && smash <= ideal + 0.02) {
+        message = `Smash cohérent (${smash.toFixed(2)}) pour ${selectedClub.label}. Les données paraissent plausibles par rapport aux ratios TrackMan.`;
+        className = "tip ok";
+      } else if (smash >= ideal - 0.08) {
+        message = `Smash correct (${smash.toFixed(2)}), mais un peu sous la référence. Cela peut suggérer un contact légèrement moins efficace.`;
+        className = "tip info";
+      } else {
+        message = `Smash faible (${smash.toFixed(2)}). Il y a probablement une perte d’énergie importante au contact.`;
+        className = "tip warning";
+      }
+
+      smashComment.className = className;
+      smashComment.innerHTML = `<strong>Lecture du smash :</strong> ${message}`;
+    }
+
+    function updateDisplay() {
+      const cs = Number(clubSpeed.value);
+      const bs = Number(ballSpeed.value);
+      const launch = Number(vla.value);
+
+      const smash = computeSmash();
+      const carry = computeCarry(bs, launch);
+      const total = computeTotal(carry, launch);
+      const apexFeet = computeApexFeet(bs, launch);
+
+      clubSpeedValue.textContent = `${cs} mph`;
+      ballSpeedValue.textContent = `${bs} mph`;
+      vlaValue.textContent = `${launch.toFixed(1)}°`;
+
+      carryValue.textContent = carry;
+      totalValue.textContent = total;
+      apexValue.textContent = apexFeet;
+      smashValue.textContent = smash.toFixed(2);
+
+      buildLaunchTip(launch);
+      buildSmashComment(smash);
+    }
+
+    clubSpeed.addEventListener("input", () => {
+      autoBallSpeedFromClubSpeed();
+      updateDisplay();
+    });
+
+    ballSpeed.addEventListener("input", updateDisplay);
+    vla.addEventListener("input", updateDisplay);
+
+    setInputsFromClub(selectedClub);
+    renderClubs();
+    updateDisplay();
+  </script>
 </body>
 </html>

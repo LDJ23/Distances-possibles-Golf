@@ -16,6 +16,8 @@
       --accent:#66d9ff;
       --accent2:#7ef0a3;
       --warn:#ffd166;
+      --danger:#ff7b7b;
+      --ok:#8ff0b3;
       --radius:22px;
       --shadow:0 14px 34px rgba(0,0,0,.34);
     }
@@ -66,7 +68,7 @@
       margin:6px 0 0;
       font-size:13px;
       color:var(--muted);
-      line-height:1.35;
+      line-height:1.4;
     }
 
     .section{
@@ -89,6 +91,7 @@
       font-size:14px;
       font-weight:800;
       cursor:pointer;
+      transition:.15s ease;
     }
 
     .club-btn.active{
@@ -161,7 +164,7 @@
 
     .metrics{
       display:grid;
-      grid-template-columns:repeat(3,1fr);
+      grid-template-columns:repeat(2,1fr);
       gap:10px;
     }
 
@@ -195,29 +198,45 @@
     }
 
     .tip{
-      background:rgba(255,209,102,.08);
-      border:1px solid rgba(255,209,102,.22);
-      color:#fff7df;
       border-radius:18px;
       padding:12px;
-      line-height:1.4;
+      line-height:1.45;
       font-size:14px;
+      margin-bottom:10px;
     }
 
     .tip strong{
       color:var(--warn);
     }
 
+    .tip.warning{
+      background:rgba(255,209,102,.08);
+      border:1px solid rgba(255,209,102,.22);
+      color:#fff7df;
+    }
+
+    .tip.info{
+      background:rgba(102,217,255,.08);
+      border:1px solid rgba(102,217,255,.20);
+      color:#eafaff;
+    }
+
+    .tip.ok{
+      background:rgba(143,240,179,.08);
+      border:1px solid rgba(143,240,179,.20);
+      color:#edfff4;
+    }
+
+    .tip.danger{
+      background:rgba(255,123,123,.09);
+      border:1px solid rgba(255,123,123,.22);
+      color:#fff0f0;
+    }
+
     .small{
       color:var(--muted);
       font-size:12px;
       line-height:1.4;
-    }
-
-    .divider{
-      height:1px;
-      background:var(--line);
-      margin:6px 0 0;
     }
 
     @media (max-width:390px){
@@ -232,7 +251,7 @@
       <div class="header">
         <h1 class="title">Distances possibles Golf</h1>
         <p class="sub">
-          Simulateur pédagogique simple : ajuste la vitesse, le lancement et regarde le carry, le total et l’apex.
+          Simulateur pédagogique simple : ajuste la vitesse, le lancement et observe le carry, le total, l’apex et le smash factor.
         </p>
       </div>
 
@@ -273,28 +292,40 @@
             <div class="metric-v" id="carryValue">0</div>
             <div class="metric-u">verges</div>
           </div>
+
           <div class="metric">
             <div class="metric-k">Total</div>
             <div class="metric-v" id="totalValue">0</div>
             <div class="metric-u">verges</div>
           </div>
+
           <div class="metric">
             <div class="metric-k">Apex</div>
             <div class="metric-v" id="apexValue">0</div>
             <div class="metric-u">pieds</div>
           </div>
+
+          <div class="metric">
+            <div class="metric-k">Smash</div>
+            <div class="metric-v" id="smashValue">0.00</div>
+            <div class="metric-u">ratio</div>
+          </div>
         </div>
       </div>
 
       <div class="section">
-        <div class="tip" id="tipBox">
+        <div class="tip warning" id="tipBox">
           <strong>Conseil :</strong> Ajuste le VLA pour te rapprocher d’une fenêtre de vol réaliste pour le bâton choisi.
+        </div>
+
+        <div class="tip info" id="smashComment">
+          <strong>Lecture du smash :</strong> en attente de calcul.
         </div>
       </div>
 
       <div class="section">
         <div class="small">
-          Modèle visuel simplifié. Les résultats sont des estimations pédagogiques, pas des mesures Trackman réelles.
+          Modèle visuel simplifié. Les résultats sont des estimations pédagogiques. Le smash factor est interprété de manière critique pour aider à juger si les données semblent plausibles ou non.
         </div>
       </div>
     </div>
@@ -302,18 +333,18 @@
 
   <script>
     const clubs = [
-      { key:"driver", label:"Driver", smash:1.50, idealLaunch:14, rollBase:26, carryFactor:1.78, apexBase:85 },
-      { key:"3w",     label:"3W",     smash:1.47, idealLaunch:13, rollBase:18, carryFactor:1.67, apexBase:78 },
-      { key:"7w",     label:"7W",     smash:1.44, idealLaunch:16, rollBase:12, carryFactor:1.53, apexBase:92 },
-      { key:"4h",     label:"4H",     smash:1.42, idealLaunch:15, rollBase:10, carryFactor:1.48, apexBase:82 },
-      { key:"5h",     label:"5H",     smash:1.40, idealLaunch:16, rollBase:8,  carryFactor:1.44, apexBase:86 },
-      { key:"4i",     label:"F4",     smash:1.38, idealLaunch:12, rollBase:7,  carryFactor:1.39, apexBase:72 },
-      { key:"5i",     label:"F5",     smash:1.35, idealLaunch:14, rollBase:6,  carryFactor:1.33, apexBase:78 },
-      { key:"6i",     label:"F6",     smash:1.33, idealLaunch:15, rollBase:5,  carryFactor:1.27, apexBase:84 },
-      { key:"7i",     label:"F7",     smash:1.30, idealLaunch:17, rollBase:4,  carryFactor:1.20, apexBase:90 },
-      { key:"8i",     label:"F8",     smash:1.26, idealLaunch:19, rollBase:3,  carryFactor:1.10, apexBase:96 },
-      { key:"9i",     label:"F9",     smash:1.22, idealLaunch:21, rollBase:2,  carryFactor:1.00, apexBase:102 },
-      { key:"pw",     label:"PW",     smash:1.18, idealLaunch:24, rollBase:1,  carryFactor:0.90, apexBase:110 }
+      { key:"driver", label:"Driver", smashIdeal:1.48, smashMax:1.52, idealLaunch:14, rollBase:26, carryFactor:1.78, apexBase:85 },
+      { key:"3w",     label:"3W",     smashIdeal:1.45, smashMax:1.50, idealLaunch:13, rollBase:18, carryFactor:1.67, apexBase:78 },
+      { key:"7w",     label:"7W",     smashIdeal:1.42, smashMax:1.47, idealLaunch:16, rollBase:12, carryFactor:1.53, apexBase:92 },
+      { key:"4h",     label:"4H",     smashIdeal:1.40, smashMax:1.45, idealLaunch:15, rollBase:10, carryFactor:1.48, apexBase:82 },
+      { key:"5h",     label:"5H",     smashIdeal:1.38, smashMax:1.43, idealLaunch:16, rollBase:8,  carryFactor:1.44, apexBase:86 },
+      { key:"4i",     label:"F4",     smashIdeal:1.36, smashMax:1.40, idealLaunch:12, rollBase:7,  carryFactor:1.39, apexBase:72 },
+      { key:"5i",     label:"F5",     smashIdeal:1.34, smashMax:1.38, idealLaunch:14, rollBase:6,  carryFactor:1.33, apexBase:78 },
+      { key:"6i",     label:"F6",     smashIdeal:1.33, smashMax:1.37, idealLaunch:15, rollBase:5,  carryFactor:1.27, apexBase:84 },
+      { key:"7i",     label:"F7",     smashIdeal:1.30, smashMax:1.34, idealLaunch:17, rollBase:4,  carryFactor:1.20, apexBase:90 },
+      { key:"8i",     label:"F8",     smashIdeal:1.27, smashMax:1.31, idealLaunch:19, rollBase:3,  carryFactor:1.10, apexBase:96 },
+      { key:"9i",     label:"F9",     smashIdeal:1.24, smashMax:1.28, idealLaunch:21, rollBase:2,  carryFactor:1.00, apexBase:102 },
+      { key:"pw",     label:"PW",     smashIdeal:1.20, smashMax:1.25, idealLaunch:24, rollBase:1,  carryFactor:0.90, apexBase:110 }
     ];
 
     const clubGrid = document.getElementById("clubGrid");
@@ -328,7 +359,10 @@
     const carryValue = document.getElementById("carryValue");
     const totalValue = document.getElementById("totalValue");
     const apexValue = document.getElementById("apexValue");
+    const smashValue = document.getElementById("smashValue");
+
     const tipBox = document.getElementById("tipBox");
+    const smashComment = document.getElementById("smashComment");
 
     let selectedClub = clubs[0];
 
@@ -350,8 +384,15 @@
 
     function autoBallSpeed() {
       const cs = Number(clubSpeed.value);
-      const suggested = Math.round(cs * selectedClub.smash);
+      const suggested = Math.round(cs * selectedClub.smashIdeal);
       ballSpeed.value = suggested;
+    }
+
+    function computeSmash() {
+      const cs = Number(clubSpeed.value);
+      const bs = Number(ballSpeed.value);
+      if (cs <= 0) return 0;
+      return bs / cs;
     }
 
     function computeResults() {
@@ -372,40 +413,79 @@
       const apexFromLaunch = launch * 4.2;
       const apexFromBallSpeed = bs * 0.22;
       const apexPenalty = launchGap * 2.2;
-      const apex = Math.max(18, Math.round(selectedClub.apexBase + apexFromLaunch + apexFromBallSpeed - apexPenalty - 55));
+      const apex = Math.max(
+        18,
+        Math.round(selectedClub.apexBase + apexFromLaunch + apexFromBallSpeed - apexPenalty - 55)
+      );
 
       return { carry, total, apex, launchGap };
     }
 
-    function buildTip(result) {
+    function buildLaunchTip() {
       const launch = Number(vla.value);
       const ideal = selectedClub.idealLaunch;
       const gap = launch - ideal;
 
       let message = "";
+      let className = "tip warning";
 
       if (Math.abs(gap) <= 1) {
         message = `Très bon VLA pour ${selectedClub.label}. Tu es proche de la fenêtre idéale autour de ${ideal}°.`;
+        className = "tip ok";
       } else if (gap < -1) {
         message = `Lancement un peu bas pour ${selectedClub.label}. Essaie de monter vers ${ideal}° pour gagner en hauteur et en arrêt de balle.`;
+        className = "tip warning";
       } else {
         message = `Lancement un peu haut pour ${selectedClub.label}. Essaie de te rapprocher de ${ideal}° pour un vol plus pénétrant.`;
+        className = "tip warning";
       }
 
-      return `<strong>Conseil :</strong> ${message}`;
+      tipBox.className = className;
+      tipBox.innerHTML = `<strong>Conseil :</strong> ${message}`;
+    }
+
+    function buildSmashComment(smash) {
+      const ideal = selectedClub.smashIdeal;
+      const max = selectedClub.smashMax;
+      let message = "";
+      let className = "tip info";
+
+      if (smash > max) {
+        message = `Smash très élevé (${smash.toFixed(2)}) pour ${selectedClub.label}. Ces données semblent possiblement irréalistes, ou bien il y a une erreur de mesure, un réglage optimiste ou une saisie incohérente.`;
+        className = "tip danger";
+      } else if (smash > ideal + 0.02) {
+        message = `Smash très fort (${smash.toFixed(2)}). C’est possible, mais on peut se demander si le contact est exceptionnellement pur ou si les données sont un peu optimistes.`;
+        className = "tip warning";
+      } else if (smash >= ideal - 0.03 && smash <= ideal + 0.02) {
+        message = `Smash cohérent (${smash.toFixed(2)}) pour ${selectedClub.label}. Les données paraissent plausibles et compatibles avec un bon centrage.`;
+        className = "tip ok";
+      } else if (smash >= ideal - 0.08) {
+        message = `Smash correct (${smash.toFixed(2)}), mais il peut être amélioré. On peut questionner la qualité du contact ou un impact légèrement hors centre.`;
+        className = "tip info";
+      } else {
+        message = `Smash faible (${smash.toFixed(2)}). Les données suggèrent une perte d’énergie importante : contact talon/pointe, face moins efficace ou strike peu solide.`;
+        className = "tip warning";
+      }
+
+      smashComment.className = className;
+      smashComment.innerHTML = `<strong>Lecture du smash :</strong> ${message}`;
     }
 
     function updateDisplay() {
+      const smash = computeSmash();
+      const result = computeResults();
+
       clubSpeedValue.textContent = `${Number(clubSpeed.value)} mph`;
       ballSpeedValue.textContent = `${Number(ballSpeed.value)} mph`;
       vlaValue.textContent = `${Number(vla.value).toFixed(1)}°`;
 
-      const result = computeResults();
-
       carryValue.textContent = result.carry;
       totalValue.textContent = result.total;
       apexValue.textContent = result.apex;
-      tipBox.innerHTML = buildTip(result);
+      smashValue.textContent = smash.toFixed(2);
+
+      buildLaunchTip();
+      buildSmashComment(smash);
     }
 
     clubSpeed.addEventListener("input", () => {

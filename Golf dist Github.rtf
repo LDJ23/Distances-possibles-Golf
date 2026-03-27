@@ -1,0 +1,372 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2868
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 <!DOCTYPE html>\
+<html lang="fr">\
+<head>\
+  <meta charset="UTF-8" />\
+  <meta\
+    name="viewport"\
+    content="width=device-width, initial-scale=1, viewport-fit=cover"\
+  />\
+  <title>Golf Simulator</title>\
+  <style>\
+    :root\{\
+      --bg:#07111f;\
+      --card:#0d1b2a;\
+      --card2:#10243a;\
+      --text:#eef4ff;\
+      --muted:#9eb1c7;\
+      --line:rgba(255,255,255,.08);\
+      --accent:#61dafb;\
+      --accent2:#7cf29a;\
+      --shadow:0 10px 30px rgba(0,0,0,.35);\
+      --radius:22px;\
+    \}\
+\
+    *\{box-sizing:border-box\}\
+    html,body\{\
+      margin:0;\
+      padding:0;\
+      background:linear-gradient(180deg,#040b14 0%,#07111f 100%);\
+      color:var(--text);\
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif;\
+      -webkit-font-smoothing:antialiased;\
+      touch-action:manipulation;\
+    \}\
+\
+    body\{\
+      min-height:100vh;\
+      padding:14px 14px calc(22px + env(safe-area-inset-bottom));\
+    \}\
+\
+    .wrap\{\
+      width:100%;\
+      max-width:430px;\
+      margin:0 auto;\
+    \}\
+\
+    .panel\{\
+      background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));\
+      border:1px solid var(--line);\
+      border-radius:28px;\
+      box-shadow:var(--shadow);\
+      overflow:hidden;\
+      backdrop-filter:blur(10px);\
+    \}\
+\
+    .top\{\
+      padding:16px 16px 8px;\
+      background:\
+        radial-gradient(circle at top right, rgba(97,218,251,.12), transparent 32%),\
+        radial-gradient(circle at top left, rgba(124,242,154,.10), transparent 28%);\
+    \}\
+\
+    .title\{\
+      font-size:24px;\
+      font-weight:800;\
+      letter-spacing:.2px;\
+      margin:0 0 4px;\
+    \}\
+\
+    .subtitle\{\
+      color:var(--muted);\
+      font-size:13px;\
+      margin:0;\
+    \}\
+\
+    .club-grid\{\
+      display:grid;\
+      grid-template-columns:repeat(4,1fr);\
+      gap:8px;\
+      padding:14px 14px 8px;\
+    \}\
+\
+    .club-btn\{\
+      appearance:none;\
+      border:none;\
+      border-radius:16px;\
+      padding:12px 8px;\
+      background:var(--card);\
+      color:var(--text);\
+      font-size:14px;\
+      font-weight:700;\
+      border:1px solid var(--line);\
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.04);\
+    \}\
+\
+    .club-btn.active\{\
+      background:linear-gradient(180deg,#16314c,#10243a);\
+      border-color:rgba(97,218,251,.4);\
+      color:#fff;\
+      outline:2px solid rgba(97,218,251,.15);\
+    \}\
+\
+    .sliders\{\
+      padding:8px 14px 12px;\
+    \}\
+\
+    .slider-card\{\
+      background:rgba(255,255,255,.025);\
+      border:1px solid var(--line);\
+      border-radius:18px;\
+      padding:12px 12px 10px;\
+      margin-bottom:10px;\
+    \}\
+\
+    .row\{\
+      display:flex;\
+      justify-content:space-between;\
+      align-items:center;\
+      gap:10px;\
+      margin-bottom:8px;\
+    \}\
+\
+    .label\{\
+      font-size:14px;\
+      font-weight:700;\
+    \}\
+\
+    .value\{\
+      min-width:76px;\
+      text-align:right;\
+      font-size:15px;\
+      font-weight:800;\
+      color:var(--accent);\
+      font-variant-numeric:tabular-nums;\
+    \}\
+\
+    input[type="range"]\{\
+      width:100%;\
+      -webkit-appearance:none;\
+      appearance:none;\
+      height:8px;\
+      border-radius:999px;\
+      background:linear-gradient(90deg,#61dafb,#7cf29a);\
+      outline:none;\
+    \}\
+\
+    input[type="range"]::-webkit-slider-thumb\{\
+      -webkit-appearance:none;\
+      appearance:none;\
+      width:26px;\
+      height:26px;\
+      border-radius:50%;\
+      background:#fff;\
+      border:3px solid #0b2236;\
+      box-shadow:0 2px 12px rgba(0,0,0,.35);\
+    \}\
+\
+    input[type="range"]::-moz-range-thumb\{\
+      width:26px;\
+      height:26px;\
+      border-radius:50%;\
+      background:#fff;\
+      border:3px solid #0b2236;\
+      box-shadow:0 2px 12px rgba(0,0,0,.35);\
+    \}\
+\
+    .results\{\
+      padding:4px 14px 16px;\
+    \}\
+\
+    .result-box\{\
+      display:grid;\
+      grid-template-columns:1fr 1fr;\
+      gap:10px;\
+    \}\
+\
+    .metric\{\
+      background:linear-gradient(180deg,var(--card2),var(--card));\
+      border:1px solid var(--line);\
+      border-radius:20px;\
+      padding:14px 12px;\
+      text-align:center;\
+    \}\
+\
+    .metric .k\{\
+      color:var(--muted);\
+      font-size:12px;\
+      margin-bottom:6px;\
+      text-transform:uppercase;\
+      letter-spacing:.08em;\
+    \}\
+\
+    .metric .v\{\
+      font-size:29px;\
+      font-weight:900;\
+      line-height:1;\
+      font-variant-numeric:tabular-nums;\
+    \}\
+\
+    .metric .u\{\
+      margin-top:4px;\
+      color:var(--muted);\
+      font-size:12px;\
+    \}\
+\
+    .footer-note\{\
+      color:var(--muted);\
+      font-size:12px;\
+      padding:0 16px 16px;\
+      line-height:1.35;\
+    \}\
+\
+    @media (max-width:390px)\{\
+      .club-grid\{grid-template-columns:repeat(3,1fr)\}\
+      .title\{font-size:22px\}\
+      .metric .v\{font-size:26px\}\
+    \}\
+  </style>\
+</head>\
+<body>\
+  <div class="wrap">\
+    <div class="panel">\
+      <div class="top">\
+        <h1 class="title">Golf Simulator</h1>\
+        <p class="subtitle">Carry et distance totale selon tes param\'e8tres</p>\
+      </div>\
+\
+      <div class="club-grid" id="clubGrid"></div>\
+\
+      <div class="sliders">\
+        <div class="slider-card">\
+          <div class="row">\
+            <div class="label">Club speed</div>\
+            <div class="value" id="clubSpeedValue">100 mph</div>\
+          </div>\
+          <input id="clubSpeed" type="range" min="50" max="130" step="1" value="100" />\
+        </div>\
+\
+        <div class="slider-card">\
+          <div class="row">\
+            <div class="label">Ball speed</div>\
+            <div class="value" id="ballSpeedValue">150 mph</div>\
+          </div>\
+          <input id="ballSpeed" type="range" min="70" max="200" step="1" value="150" />\
+        </div>\
+\
+        <div class="slider-card">\
+          <div class="row">\
+            <div class="label">VLA</div>\
+            <div class="value" id="vlaValue">14 \'b0</div>\
+          </div>\
+          <input id="vla" type="range" min="5" max="30" step="0.5" value="14" />\
+        </div>\
+      </div>\
+\
+      <div class="results">\
+        <div class="result-box">\
+          <div class="metric">\
+            <div class="k">Carry</div>\
+            <div class="v" id="carryValue">0</div>\
+            <div class="u">verges</div>\
+          </div>\
+          <div class="metric">\
+            <div class="k">Total</div>\
+            <div class="v" id="totalValue">0</div>\
+            <div class="u">verges</div>\
+          </div>\
+        </div>\
+      </div>\
+\
+      <div class="footer-note">\
+        Mod\'e8le p\'e9dagogique visuel. Les r\'e9sultats sont des estimations simplifi\'e9es bas\'e9es sur la vitesse de balle, le VLA et le type de b\'e2ton.\
+      </div>\
+    </div>\
+  </div>\
+\
+  <script>\
+    const clubs = [\
+      \{ key: "driver", label: "Driver", smash: 1.50, launchAdj: 0,  roll: 24, base: 1.78 \},\
+      \{ key: "3w",     label: "3W",     smash: 1.47, launchAdj: 1,  roll: 18, base: 1.67 \},\
+      \{ key: "7w",     label: "7W",     smash: 1.44, launchAdj: 3,  roll: 12, base: 1.53 \},\
+      \{ key: "4h",     label: "4H",     smash: 1.42, launchAdj: 3,  roll: 10, base: 1.48 \},\
+      \{ key: "5h",     label: "5H",     smash: 1.40, launchAdj: 4,  roll: 8,  base: 1.44 \},\
+      \{ key: "4i",     label: "F4",     smash: 1.38, launchAdj: 1,  roll: 7,  base: 1.39 \},\
+      \{ key: "5i",     label: "F5",     smash: 1.35, launchAdj: 2,  roll: 6,  base: 1.33 \},\
+      \{ key: "6i",     label: "F6",     smash: 1.33, launchAdj: 3,  roll: 5,  base: 1.27 \},\
+      \{ key: "7i",     label: "F7",     smash: 1.30, launchAdj: 4,  roll: 4,  base: 1.20 \},\
+      \{ key: "8i",     label: "F8",     smash: 1.26, launchAdj: 5,  roll: 3,  base: 1.10 \},\
+      \{ key: "9i",     label: "F9",     smash: 1.22, launchAdj: 6,  roll: 2,  base: 1.00 \},\
+      \{ key: "pw",     label: "PW",     smash: 1.18, launchAdj: 7,  roll: 1,  base: 0.90 \}\
+    ];\
+\
+    const clubGrid = document.getElementById("clubGrid");\
+    const clubSpeed = document.getElementById("clubSpeed");\
+    const ballSpeed = document.getElementById("ballSpeed");\
+    const vla = document.getElementById("vla");\
+\
+    const clubSpeedValue = document.getElementById("clubSpeedValue");\
+    const ballSpeedValue = document.getElementById("ballSpeedValue");\
+    const vlaValue = document.getElementById("vlaValue");\
+\
+    const carryValue = document.getElementById("carryValue");\
+    const totalValue = document.getElementById("totalValue");\
+\
+    let selectedClub = clubs[0];\
+\
+    function renderClubs() \{\
+      clubGrid.innerHTML = "";\
+      clubs.forEach(club => \{\
+        const btn = document.createElement("button");\
+        btn.className = "club-btn" + (club.key === selectedClub.key ? " active" : "");\
+        btn.textContent = club.label;\
+        btn.addEventListener("click", () => \{\
+          selectedClub = club;\
+          renderClubs();\
+          autoBallSpeed();\
+          updateDisplay();\
+        \});\
+        clubGrid.appendChild(btn);\
+      \});\
+    \}\
+\
+    function autoBallSpeed() \{\
+      const cs = Number(clubSpeed.value);\
+      const suggested = Math.round(cs * selectedClub.smash);\
+      ballSpeed.value = suggested;\
+    \}\
+\
+    function compute() \{\
+      const bs = Number(ballSpeed.value);\
+      const launch = Number(vla.value);\
+\
+      const idealLaunch = 14 + selectedClub.launchAdj;\
+      const launchPenalty = Math.abs(launch - idealLaunch) * 1.5;\
+      const rawCarry = (bs * selectedClub.base) - launchPenalty;\
+\
+      const carry = Math.max(20, Math.round(rawCarry));\
+      const total = Math.max(carry, Math.round(carry + selectedClub.roll));\
+\
+      return \{ carry, total \};\
+    \}\
+\
+    function updateDisplay() \{\
+      clubSpeedValue.textContent = `$\{Number(clubSpeed.value)\} mph`;\
+      ballSpeedValue.textContent = `$\{Number(ballSpeed.value)\} mph`;\
+      vlaValue.textContent = `$\{Number(vla.value)\} \'b0`;\
+\
+      const result = compute();\
+      carryValue.textContent = result.carry;\
+      totalValue.textContent = result.total;\
+    \}\
+\
+    clubSpeed.addEventListener("input", () => \{\
+      autoBallSpeed();\
+      updateDisplay();\
+    \});\
+\
+    ballSpeed.addEventListener("input", updateDisplay);\
+    vla.addEventListener("input", updateDisplay);\
+\
+    renderClubs();\
+    autoBallSpeed();\
+    updateDisplay();\
+  </script>\
+</body>\
+</html>}

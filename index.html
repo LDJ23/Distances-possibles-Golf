@@ -23,6 +23,9 @@
       --sand:#d8c08d;
       --white:#ffffff;
       --shadow:0 14px 30px rgba(0,0,0,.26);
+      --warn-bg:rgba(255,170,60,.16);
+      --warn-line:rgba(255,170,60,.55);
+      --warn-text:#ffd18f;
     }
 
     *{
@@ -149,6 +152,13 @@
       border:1px solid var(--line);
       border-radius:16px;
       padding:8px 10px 10px;
+      transition:.15s ease;
+    }
+
+    .slider-card.warning{
+      background:var(--warn-bg);
+      border-color:var(--warn-line);
+      box-shadow:inset 0 0 0 1px rgba(255,170,60,.10);
     }
 
     .row{
@@ -171,6 +181,10 @@
       color:var(--sand);
       font-variant-numeric:tabular-nums;
       white-space:nowrap;
+    }
+
+    .slider-card.warning .value{
+      color:var(--warn-text);
     }
 
     input[type="range"]{
@@ -222,6 +236,13 @@
       display:flex;
       flex-direction:column;
       justify-content:center;
+      transition:.15s ease;
+    }
+
+    .metric.warning{
+      background:linear-gradient(180deg, rgba(255,170,60,.16), rgba(255,170,60,.10));
+      border-color:var(--warn-line);
+      box-shadow:inset 0 0 0 1px rgba(255,170,60,.10);
     }
 
     .metric-k{
@@ -237,6 +258,10 @@
       line-height:1;
       font-weight:950;
       font-variant-numeric:tabular-nums;
+    }
+
+    .metric.warning .metric-v{
+      color:var(--warn-text);
     }
 
     .metric-u{
@@ -326,7 +351,7 @@
         <div class="club-grid" id="clubGrid"></div>
 
         <div class="sliders">
-          <div class="slider-card">
+          <div class="slider-card" id="clubSpeedCard">
             <div class="row">
               <div class="label">Club speed</div>
               <div class="value" id="clubSpeedValue">76 mph</div>
@@ -334,7 +359,7 @@
             <input id="clubSpeed" type="range" min="60" max="120" step="1" value="76" />
           </div>
 
-          <div class="slider-card">
+          <div class="slider-card" id="ballSpeedCard">
             <div class="row">
               <div class="label">Ball speed</div>
               <div class="value" id="ballSpeedValue">104 mph</div>
@@ -342,7 +367,7 @@
             <input id="ballSpeed" type="range" min="80" max="185" step="1" value="104" />
           </div>
 
-          <div class="slider-card">
+          <div class="slider-card" id="vlaCard">
             <div class="row">
               <div class="label">VLA</div>
               <div class="value" id="vlaValue">19.0°</div>
@@ -364,13 +389,13 @@
             <div class="metric-u">verges</div>
           </div>
 
-          <div class="metric">
+          <div class="metric" id="apexMetric">
             <div class="metric-k">Apex</div>
             <div class="metric-v" id="apexValue">0</div>
             <div class="metric-u">pieds</div>
           </div>
 
-          <div class="metric">
+          <div class="metric" id="smashMetric">
             <div class="metric-k">Smash</div>
             <div class="metric-v" id="smashValue">0.00</div>
             <div class="metric-u">ratio</div>
@@ -384,10 +409,6 @@
 
           <div class="tip info" id="smashComment">
             <strong>Smash :</strong> lecture en attente.
-          </div>
-
-          <div class="tip info" id="apexComment">
-            <strong>Apex :</strong> qualité en attente.
           </div>
         </div>
       </div>
@@ -428,7 +449,10 @@
 
     const tipBox = document.getElementById("tipBox");
     const smashComment = document.getElementById("smashComment");
-    const apexComment = document.getElementById("apexComment");
+
+    const vlaCard = document.getElementById("vlaCard");
+    const apexMetric = document.getElementById("apexMetric");
+    const smashMetric = document.getElementById("smashMetric");
 
     let selectedClub = clubs.find(c => c.key === "7i");
 
@@ -512,7 +536,6 @@
 
       const speedFactor = getSpeedApexFactor(cs, selectedClub.clubSpeed, selectedClub.key);
       apexFeet *= speedFactor;
-
       apexFeet *= Math.pow(bsRatio, 0.35);
       apexFeet *= (1 + (launchDelta * 0.022));
 
@@ -531,42 +554,30 @@
       return Math.round(carry + roll);
     }
 
-    function buildLaunchTip(launch){
+    function getLaunchStatus(launch){
       const ideal = selectedClub.launch;
       const gap = launch - ideal;
 
       if (Math.abs(gap) <= 1.0) {
-        tipBox.className = "tip ok";
-        tipBox.innerHTML = `<strong>Fenêtre :</strong> très bonne pour ${selectedClub.label}. Tu es proche de ${ideal.toFixed(1)}°.`;
+        return { status: "good", ideal, gap };
       } else if (gap < -1.0) {
-        tipBox.className = "tip warn";
-        tipBox.innerHTML = `<strong>Fenêtre :</strong> launch un peu bas pour ${selectedClub.label}. Référence ≈ ${ideal.toFixed(1)}°.`;
+        return { status: "low", ideal, gap };
       } else {
-        tipBox.className = "tip warn";
-        tipBox.innerHTML = `<strong>Fenêtre :</strong> launch un peu haut pour ${selectedClub.label}. Référence ≈ ${ideal.toFixed(1)}°.`;
+        return { status: "high", ideal, gap };
       }
     }
 
-    function buildSmashComment(smash){
+    function getSmashStatus(smash){
       const ideal = selectedClub.smashIdeal;
       const max = Math.min(selectedClub.smashMax, SMASH_CAP);
 
-      if (smash >= max - 0.01) {
-        smashComment.className = "tip warn";
-        smashComment.innerHTML = `<strong>Smash :</strong> ${smash.toFixed(2)} au plafond réaliste pour ${selectedClub.label}.`;
-      } else if (smash >= ideal - 0.03 && smash <= ideal + 0.02) {
-        smashComment.className = "tip ok";
-        smashComment.innerHTML = `<strong>Smash :</strong> ${smash.toFixed(2)} cohérent pour ${selectedClub.label}.`;
-      } else if (smash >= ideal - 0.08) {
-        smashComment.className = "tip info";
-        smashComment.innerHTML = `<strong>Smash :</strong> ${smash.toFixed(2)} correct, mais un peu sous la référence.`;
-      } else {
-        smashComment.className = "tip warn";
-        smashComment.innerHTML = `<strong>Smash :</strong> ${smash.toFixed(2)} faible. Perte d’énergie probable au contact.`;
-      }
+      if (smash >= max - 0.01) return { status: "high", ideal, max };
+      if (smash >= ideal - 0.03 && smash <= ideal + 0.02) return { status: "good", ideal, max };
+      if (smash >= ideal - 0.08) return { status: "ok", ideal, max };
+      return { status: "low", ideal, max };
     }
 
-    function buildApexComment(apexFeet){
+    function getApexStatus(apexFeet){
       const cs = Number(clubSpeed.value);
 
       if (selectedClub.key === "driver") {
@@ -589,16 +600,12 @@
         }
 
         if (apexFeet >= minIdeal && apexFeet <= maxIdeal) {
-          apexComment.className = "tip ok";
-          apexComment.innerHTML = `<strong>Apex :</strong> très bon pour le driver. Cible ≈ ${target} pieds.`;
+          return { status: "good", target, minIdeal, maxIdeal };
         } else if (apexFeet < minIdeal) {
-          apexComment.className = "tip warn";
-          apexComment.innerHTML = `<strong>Apex :</strong> un peu bas pour le driver. Cible ≈ ${target} pieds.`;
+          return { status: "low", target, minIdeal, maxIdeal };
         } else {
-          apexComment.className = "tip warn";
-          apexComment.innerHTML = `<strong>Apex :</strong> un peu haut pour le driver. Cible ≈ ${target} pieds.`;
+          return { status: "high", target, minIdeal, maxIdeal };
         }
-        return;
       }
 
       const target = Math.round(
@@ -613,14 +620,48 @@
       const highBound = Math.round(target * 1.10);
 
       if (apexFeet >= lowBound && apexFeet <= highBound) {
-        apexComment.className = "tip ok";
-        apexComment.innerHTML = `<strong>Apex :</strong> très bon pour ${selectedClub.label}. Cible dynamique ≈ ${target} pieds.`;
+        return { status: "good", target, lowBound, highBound };
       } else if (apexFeet < lowBound) {
-        apexComment.className = "tip warn";
-        apexComment.innerHTML = `<strong>Apex :</strong> un peu bas pour ${selectedClub.label}. Cible dynamique ≈ ${target} pieds.`;
+        return { status: "low", target, lowBound, highBound };
       } else {
-        apexComment.className = "tip warn";
-        apexComment.innerHTML = `<strong>Apex :</strong> un peu haut pour ${selectedClub.label}. Cible dynamique ≈ ${target} pieds.`;
+        return { status: "high", target, lowBound, highBound };
+      }
+    }
+
+    function updateHighlights(launchStatus, smashStatus, apexStatus){
+      vlaCard.classList.toggle("warning", launchStatus.status !== "good");
+      smashMetric.classList.toggle("warning", smashStatus.status !== "good");
+      apexMetric.classList.toggle("warning", apexStatus.status !== "good");
+    }
+
+    function buildLaunchTip(launchStatus){
+      const ideal = launchStatus.ideal;
+
+      if (launchStatus.status === "good") {
+        tipBox.className = "tip ok";
+        tipBox.innerHTML = `<strong>Fenêtre :</strong> très bonne pour ${selectedClub.label}. Tu es proche de ${ideal.toFixed(1)}°.`;
+      } else if (launchStatus.status === "low") {
+        tipBox.className = "tip warn";
+        tipBox.innerHTML = `<strong>Fenêtre :</strong> launch un peu bas pour ${selectedClub.label}. Référence ≈ ${ideal.toFixed(1)}°.`;
+      } else {
+        tipBox.className = "tip warn";
+        tipBox.innerHTML = `<strong>Fenêtre :</strong> launch un peu haut pour ${selectedClub.label}. Référence ≈ ${ideal.toFixed(1)}°.`;
+      }
+    }
+
+    function buildSmashComment(smash, smashStatus){
+      if (smashStatus.status === "high") {
+        smashComment.className = "tip warn";
+        smashComment.innerHTML = `<strong>Smash :</strong> ${smash.toFixed(2)} au plafond réaliste pour ${selectedClub.label}.`;
+      } else if (smashStatus.status === "good") {
+        smashComment.className = "tip ok";
+        smashComment.innerHTML = `<strong>Smash :</strong> ${smash.toFixed(2)} cohérent pour ${selectedClub.label}.`;
+      } else if (smashStatus.status === "ok") {
+        smashComment.className = "tip info";
+        smashComment.innerHTML = `<strong>Smash :</strong> ${smash.toFixed(2)} correct, mais un peu sous la référence.`;
+      } else {
+        smashComment.className = "tip warn";
+        smashComment.innerHTML = `<strong>Smash :</strong> ${smash.toFixed(2)} faible. Perte d’énergie probable au contact.`;
       }
     }
 
@@ -636,6 +677,10 @@
       const total = computeTotal(carry, launch);
       const apexFeet = computeApexFeet(bs, launch);
 
+      const launchStatus = getLaunchStatus(launch);
+      const smashStatus = getSmashStatus(smash);
+      const apexStatus = getApexStatus(apexFeet);
+
       clubSpeedValue.textContent = `${cs} mph`;
       ballSpeedValue.textContent = `${bs} mph`;
       vlaValue.textContent = `${launch.toFixed(1)}°`;
@@ -645,9 +690,9 @@
       apexValue.textContent = apexFeet;
       smashValue.textContent = smash.toFixed(2);
 
-      buildLaunchTip(launch);
-      buildSmashComment(smash);
-      buildApexComment(apexFeet);
+      buildLaunchTip(launchStatus);
+      buildSmashComment(smash, smashStatus);
+      updateHighlights(launchStatus, smashStatus, apexStatus);
     }
 
     clubSpeed.addEventListener("input", () => {

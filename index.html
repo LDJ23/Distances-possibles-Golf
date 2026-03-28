@@ -395,7 +395,7 @@
       </div>
 
       <div class="footnote">
-        Modèle visuel simplifié. Les résultats sont des estimations pédagogiques basées sur des repères TrackMan. Le total respecte maintenant une logique de roule plus réaliste selon chaque bâton.
+        Modèle visuel simplifié. Les résultats sont des estimations pédagogiques basées sur des repères TrackMan. Le "roll" de chaque bâton peut varier selon le type de surface.
       </div>
 
       <div class="credits">Crédits: Louis-Daniel Joly</div>
@@ -427,8 +427,9 @@
     const tip2 = document.getElementById("tip2");
 
     let selectedClub = "driver";
+    let previousClubSpeed = parseFloat(clubSpeed.value);
+    let previousBallSpeed = parseFloat(ballSpeed.value);
 
-    // Base inspirée du tableau TrackMan + logique de roule réaliste
     const clubData = {
       driver: { label:"Driver", clubSpeed:94, ballSpeed:140, smash:1.48, launch:13.2, apexYds:25, carry:218, minRoll:22, maxRoll:38 },
       "3w":   { label:"3W", clubSpeed:90, ballSpeed:132, smash:1.48, launch:11.2, apexYds:23, carry:195, minRoll:14, maxRoll:26 },
@@ -462,12 +463,35 @@
       clubSpeed.value = d.clubSpeed;
       ballSpeed.value = d.ballSpeed;
       launch.value = d.launch;
+      previousClubSpeed = d.clubSpeed;
+      previousBallSpeed = d.ballSpeed;
     }
 
     function updateButtons() {
       clubButtons.forEach(btn => {
         btn.classList.toggle("active", btn.dataset.club === selectedClub);
       });
+    }
+
+    function enforceSmashLimit(changedSlider) {
+      const cs = parseFloat(clubSpeed.value);
+      const bs = parseFloat(ballSpeed.value);
+      const smashRaw = bs / cs;
+
+      if (smashRaw <= 1.5) {
+        previousClubSpeed = cs;
+        previousBallSpeed = bs;
+        return;
+      }
+
+      if (changedSlider === "ballSpeed") {
+        ballSpeed.value = previousBallSpeed;
+      } else if (changedSlider === "clubSpeed") {
+        clubSpeed.value = previousClubSpeed;
+      } else {
+        const maxBallSpeed = Math.floor(parseFloat(clubSpeed.value) * 1.5);
+        ballSpeed.value = Math.min(parseFloat(ballSpeed.value), maxBallSpeed);
+      }
     }
 
     function computeValues() {
@@ -482,21 +506,12 @@
       const bsRatio = bs / d.ballSpeed;
       const launchDelta = la - d.launch;
 
-      // Carry basé surtout sur ball speed, puis vitesse de club
       let carry = d.carry * (0.34 * csRatio + 0.66 * bsRatio);
-
-      // Pénalité si launch hors zone idéale
       carry *= (1 - Math.min(Math.abs(launchDelta) * 0.010, 0.09));
-
-      // Influence légère du smash
       carry *= (1 + ((smash - d.smash) * 0.10));
-
       carry = clamp(carry, d.carry * 0.78, d.carry * 1.24);
 
-      // Roule réaliste selon le bâton
       let rollBase = d.minRoll + ((d.maxRoll - d.minRoll) * 0.45);
-
-      // si plus de vitesse et launch plus bas → plus de roule
       rollBase += (cs - d.clubSpeed) * 0.22;
       rollBase += (bs - d.ballSpeed) * 0.10;
       rollBase -= (la - d.launch) * 0.80;
@@ -560,7 +575,9 @@
       }
 
       let smashMsg;
-      if (smashWarn) {
+      if (smash >= 1.5) {
+        smashMsg = `Smash plafonné à 1.50 pour rester dans une zone réaliste. Les curseurs empêchent maintenant d’aller plus loin.`;
+      } else if (smashWarn) {
         smashMsg = `Smash à surveiller (${smash.toFixed(2)}) pour ${d.label}.`;
       } else {
         smashMsg = `Smash cohérent (${smash.toFixed(2)}) pour ${d.label}. Les données paraissent plausibles et compatibles avec un bon centrage.`;
@@ -579,9 +596,20 @@
       });
     });
 
-    clubSpeed.addEventListener("input", update);
-    ballSpeed.addEventListener("input", update);
-    launch.addEventListener("input", update);
+    clubSpeed.addEventListener("input", () => {
+      enforceSmashLimit("clubSpeed");
+      update();
+    });
+
+    ballSpeed.addEventListener("input", () => {
+      enforceSmashLimit("ballSpeed");
+      update();
+    });
+
+    launch.addEventListener("input", () => {
+      enforceSmashLimit("launch");
+      update();
+    });
 
     setDefaultsForClub(selectedClub);
     updateButtons();

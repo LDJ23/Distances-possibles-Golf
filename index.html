@@ -419,18 +419,18 @@
     const SMASH_CAP = 1.50;
 
     const clubs = [
-      { key:"driver", label:"Driver", clubSpeed:94, ballSpeed:140, smashIdeal:1.48, smashMax:1.50, launch:13.2, apexBase:95, carry:218, roll:18, apexMin:75, apexMax:120 },
-      { key:"3w",    label:"3W",     clubSpeed:90, ballSpeed:132, smashIdeal:1.48, smashMax:1.50, launch:11.2, apexBase:78, carry:195, roll:14, apexMin:60, apexMax:95  },
-      { key:"7w",    label:"7W",     clubSpeed:85, ballSpeed:123, smashIdeal:1.46, smashMax:1.49, launch:12.7, apexBase:84, carry:174, roll:9,  apexMin:68, apexMax:102 },
-      { key:"4h",    label:"4H",     clubSpeed:83, ballSpeed:120, smashIdeal:1.45, smashMax:1.48, launch:13.4, apexBase:82, carry:171, roll:8,  apexMin:66, apexMax:98  },
-      { key:"5h",    label:"5H",     clubSpeed:81, ballSpeed:117, smashIdeal:1.44, smashMax:1.47, launch:14.0, apexBase:86, carry:166, roll:7,  apexMin:68, apexMax:102 },
-      { key:"4i",    label:"F4",     clubSpeed:80, ballSpeed:116, smashIdeal:1.45, smashMax:1.47, launch:14.3, apexBase:72, carry:169, roll:7,  apexMin:58, apexMax:88  },
-      { key:"5i",    label:"F5",     clubSpeed:79, ballSpeed:112, smashIdeal:1.43, smashMax:1.45, launch:14.8, apexBase:78, carry:161, roll:6,  apexMin:62, apexMax:94  },
-      { key:"6i",    label:"F6",     clubSpeed:78, ballSpeed:109, smashIdeal:1.41, smashMax:1.43, launch:17.1, apexBase:84, carry:152, roll:5,  apexMin:68, apexMax:100 },
-      { key:"7i",    label:"F7",     clubSpeed:76, ballSpeed:104, smashIdeal:1.38, smashMax:1.40, launch:19.0, apexBase:90, carry:141, roll:4,  apexMin:72, apexMax:106 },
-      { key:"8i",    label:"F8",     clubSpeed:74, ballSpeed:100, smashIdeal:1.33, smashMax:1.35, launch:20.8, apexBase:94, carry:130, roll:3,  apexMin:76, apexMax:110 },
-      { key:"9i",    label:"F9",     clubSpeed:72, ballSpeed:93,  smashIdeal:1.32, smashMax:1.34, launch:23.9, apexBase:98, carry:119, roll:2,  apexMin:80, apexMax:114 },
-      { key:"pw",    label:"PW",     clubSpeed:70, ballSpeed:86,  smashIdeal:1.28, smashMax:1.30, launch:25.7, apexBase:92, carry:107, roll:1,  apexMin:76, apexMax:108 }
+      { key:"driver", label:"Driver", clubSpeed:94, ballSpeed:140, smashIdeal:1.48, smashMax:1.50, launch:13.2, apexBase:100, carry:218, roll:18, apexMin:75, apexMax:122 },
+      { key:"3w",    label:"3W",     clubSpeed:90, ballSpeed:132, smashIdeal:1.48, smashMax:1.50, launch:11.2, apexBase:78,  carry:195, roll:14, apexMin:60, apexMax:96  },
+      { key:"7w",    label:"7W",     clubSpeed:85, ballSpeed:123, smashIdeal:1.46, smashMax:1.49, launch:12.7, apexBase:86,  carry:174, roll:9,  apexMin:68, apexMax:105 },
+      { key:"4h",    label:"4H",     clubSpeed:83, ballSpeed:120, smashIdeal:1.45, smashMax:1.48, launch:13.4, apexBase:82,  carry:171, roll:8,  apexMin:66, apexMax:100 },
+      { key:"5h",    label:"5H",     clubSpeed:81, ballSpeed:117, smashIdeal:1.44, smashMax:1.47, launch:14.0, apexBase:86,  carry:166, roll:7,  apexMin:68, apexMax:104 },
+      { key:"4i",    label:"F4",     clubSpeed:80, ballSpeed:116, smashIdeal:1.45, smashMax:1.47, launch:14.3, apexBase:72,  carry:169, roll:7,  apexMin:58, apexMax:90  },
+      { key:"5i",    label:"F5",     clubSpeed:79, ballSpeed:112, smashIdeal:1.43, smashMax:1.45, launch:14.8, apexBase:78,  carry:161, roll:6,  apexMin:62, apexMax:96  },
+      { key:"6i",    label:"F6",     clubSpeed:78, ballSpeed:109, smashIdeal:1.41, smashMax:1.43, launch:17.1, apexBase:84,  carry:152, roll:5,  apexMin:68, apexMax:102 },
+      { key:"7i",    label:"F7",     clubSpeed:76, ballSpeed:104, smashIdeal:1.38, smashMax:1.40, launch:19.0, apexBase:90,  carry:141, roll:4,  apexMin:72, apexMax:108 },
+      { key:"8i",    label:"F8",     clubSpeed:74, ballSpeed:100, smashIdeal:1.33, smashMax:1.35, launch:20.8, apexBase:94,  carry:130, roll:3,  apexMin:76, apexMax:112 },
+      { key:"9i",    label:"F9",     clubSpeed:72, ballSpeed:93,  smashIdeal:1.32, smashMax:1.34, launch:23.9, apexBase:98,  carry:119, roll:2,  apexMin:80, apexMax:116 },
+      { key:"pw",    label:"PW",     clubSpeed:70, ballSpeed:86,  smashIdeal:1.28, smashMax:1.30, launch:25.7, apexBase:92,  carry:107, roll:1,  apexMin:76, apexMax:110 }
     ];
 
     const clubGrid = document.getElementById("clubGrid");
@@ -518,30 +518,62 @@
       const ratio = cs / refCs;
 
       let exponent = 1.05;
+      if (clubKey === "driver") exponent = 1.16;
+      else if (["3w", "7w", "4h", "5h"].includes(clubKey)) exponent = 1.11;
+      else if (["4i", "5i", "6i"].includes(clubKey)) exponent = 1.07;
+      else exponent = 1.03;
 
-      if (clubKey === "driver") exponent = 1.18;
-      else if (["3w", "7w", "4h", "5h"].includes(clubKey)) exponent = 1.12;
-      else if (["4i", "5i", "6i"].includes(clubKey)) exponent = 1.08;
-      else exponent = 1.04;
+      return Math.pow(ratio, exponent);
+    }
+
+    function getLaunchApexFactor(launch, refLaunch, clubKey){
+      const delta = launch - refLaunch;
+
+      let sensitivity = 0.020;
+      if (clubKey === "driver") sensitivity = 0.024;
+      else if (["3w", "7w", "4h", "5h"].includes(clubKey)) sensitivity = 0.022;
+      else sensitivity = 0.018;
+
+      return clamp(1 + (delta * sensitivity), 0.86, 1.18);
+    }
+
+    function getBallSpeedApexFactor(bs, refBs, clubKey){
+      const ratio = bs / refBs;
+
+      let exponent = 0.28;
+      if (clubKey === "driver") exponent = 0.34;
+      else if (["3w", "7w", "4h", "5h"].includes(clubKey)) exponent = 0.31;
 
       return Math.pow(ratio, exponent);
     }
 
     function computeApexFeet(bs, launch){
       const cs = Number(clubSpeed.value);
-      const bsRatio = bs / selectedClub.ballSpeed;
-      const launchDelta = launch - selectedClub.launch;
 
       let apexFeet = selectedClub.apexBase;
 
       const speedFactor = getSpeedApexFactor(cs, selectedClub.clubSpeed, selectedClub.key);
+      const launchFactor = getLaunchApexFactor(launch, selectedClub.launch, selectedClub.key);
+      const ballSpeedFactor = getBallSpeedApexFactor(bs, selectedClub.ballSpeed, selectedClub.key);
+
       apexFeet *= speedFactor;
-      apexFeet *= Math.pow(bsRatio, 0.35);
-      apexFeet *= (1 + (launchDelta * 0.022));
+      apexFeet *= launchFactor;
+      apexFeet *= ballSpeedFactor;
 
       apexFeet = clamp(apexFeet, selectedClub.apexMin, selectedClub.apexMax);
 
       return Math.round(apexFeet);
+    }
+
+    function computeDynamicApexTarget(bs, launch){
+      const cs = Number(clubSpeed.value);
+
+      let target = selectedClub.apexBase;
+      target *= getSpeedApexFactor(cs, selectedClub.clubSpeed, selectedClub.key);
+      target *= getLaunchApexFactor(launch, selectedClub.launch, selectedClub.key);
+      target *= getBallSpeedApexFactor(bs, selectedClub.ballSpeed, selectedClub.key);
+
+      return clamp(target, selectedClub.apexMin, selectedClub.apexMax);
     }
 
     function computeTotal(carry, launch){
@@ -577,54 +609,27 @@
       return { status: "low", ideal, max };
     }
 
-    function getApexStatus(apexFeet){
-      const cs = Number(clubSpeed.value);
+    function getApexTolerance(clubKey){
+      if (clubKey === "driver") return 0.11;
+      if (["3w", "7w", "4h", "5h"].includes(clubKey)) return 0.10;
+      if (["4i", "5i", "6i"].includes(clubKey)) return 0.09;
+      return 0.08;
+    }
 
-      if (selectedClub.key === "driver") {
-        let minIdeal = 75;
-        let maxIdeal = 100;
-        let target = 95;
+    function getApexStatus(apexFeet, bs, launch){
+      const target = computeDynamicApexTarget(bs, launch);
+      const tol = getApexTolerance(selectedClub.key);
 
-        if (cs >= 84 && cs <= 96) {
-          minIdeal = 70;
-          maxIdeal = 86;
-          target = 78;
-        } else if (cs >= 97 && cs <= 104) {
-          minIdeal = 87;
-          maxIdeal = 100;
-          target = 95;
-        } else if (cs >= 105) {
-          minIdeal = 100;
-          maxIdeal = 120;
-          target = 110;
-        }
-
-        if (apexFeet >= minIdeal && apexFeet <= maxIdeal) {
-          return { status: "good", target, minIdeal, maxIdeal };
-        } else if (apexFeet < minIdeal) {
-          return { status: "low", target, minIdeal, maxIdeal };
-        } else {
-          return { status: "high", target, minIdeal, maxIdeal };
-        }
-      }
-
-      const target = Math.round(
-        clamp(
-          selectedClub.apexBase * getSpeedApexFactor(cs, selectedClub.clubSpeed, selectedClub.key),
-          selectedClub.apexMin,
-          selectedClub.apexMax
-        )
-      );
-
-      const lowBound = Math.round(target * 0.90);
-      const highBound = Math.round(target * 1.10);
+      const lowBound = Math.round(target * (1 - tol));
+      const highBound = Math.round(target * (1 + tol));
+      const roundedTarget = Math.round(target);
 
       if (apexFeet >= lowBound && apexFeet <= highBound) {
-        return { status: "good", target, lowBound, highBound };
+        return { status: "good", target: roundedTarget, lowBound, highBound };
       } else if (apexFeet < lowBound) {
-        return { status: "low", target, lowBound, highBound };
+        return { status: "low", target: roundedTarget, lowBound, highBound };
       } else {
-        return { status: "high", target, lowBound, highBound };
+        return { status: "high", target: roundedTarget, lowBound, highBound };
       }
     }
 
@@ -679,7 +684,7 @@
 
       const launchStatus = getLaunchStatus(launch);
       const smashStatus = getSmashStatus(smash);
-      const apexStatus = getApexStatus(apexFeet);
+      const apexStatus = getApexStatus(apexFeet, bs, launch);
 
       clubSpeedValue.textContent = `${cs} mph`;
       ballSpeedValue.textContent = `${bs} mph`;

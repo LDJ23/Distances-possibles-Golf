@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Analyse swing STM</title>
 
   <meta property="og:title" content="Analyse swing STM - Simulateur golf">
@@ -12,78 +12,113 @@
   <meta name="twitter:card" content="summary_large_image">
 
   <style>
-    * { box-sizing: border-box; }
+    :root {
+      --bg1: #0d4f2d;
+      --bg2: #2f6b46;
+      --card: rgba(255,255,255,0.08);
+      --card-border: rgba(255,255,255,0.14);
+      --soft-panel: rgba(255,255,255,0.12);
+      --yellow: #facc15;
+      --cream: #f5e8be;
+      --text: #f7f7ef;
+      --muted: #dce7d8;
+      --green-text: #c7f7d4;
+      --warn: #ffe08a;
+      --alert: #ffd0d0;
+      --dark-green: #16532f;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      background:
+        radial-gradient(circle at top, #0e6a39 0%, #155a34 26%, #2e6b46 58%, #9ead97 100%);
+      color: var(--text);
+    }
 
     body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background:
-        linear-gradient(180deg, rgba(8,46,24,0.96) 0%, rgba(18,82,45,0.95) 38%, rgba(201,160,74,0.18) 100%);
-      color: #f8fafc;
-      padding: 14px;
+      padding: 8px;
     }
 
-    .container {
+    .shell {
       max-width: 430px;
       margin: 0 auto;
+      padding: 8px 0 16px;
     }
 
-    .card {
-      background: rgba(255,255,255,0.08);
-      backdrop-filter: blur(6px);
+    .app {
+      background: linear-gradient(180deg, rgba(31,91,53,0.92), rgba(72,122,88,0.82));
       border: 1px solid rgba(255,255,255,0.16);
-      border-radius: 20px;
-      padding: 14px;
-      box-shadow: 0 10px 26px rgba(0,0,0,0.25);
+      border-radius: 22px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+      padding: 14px 12px 18px;
+      backdrop-filter: blur(6px);
     }
 
     h1 {
-      margin: 0 0 10px;
+      margin: 2px 0 12px;
       text-align: center;
-      font-size: 1.35rem;
-      color: #f7e7b6;
-      letter-spacing: 0.3px;
+      font-size: clamp(1.9rem, 5.8vw, 2.35rem);
+      line-height: 1.05;
+      color: var(--cream);
+      font-weight: 800;
+      letter-spacing: -0.02em;
     }
 
-    .mode-emploi {
-      background: rgba(255,255,255,0.10);
-      border-left: 4px solid #eab308;
-      border-radius: 12px;
-      padding: 10px 12px;
-      margin-bottom: 14px;
-      font-size: 0.9rem;
-      line-height: 1.35;
-      color: #fefce8;
+    .instructions {
+      background: rgba(255,255,255,0.14);
+      border-left: 5px solid var(--yellow);
+      border-radius: 14px;
+      padding: 14px 14px 14px 16px;
+      margin-bottom: 16px;
+      color: #f7f7ef;
+      font-size: 1rem;
+      line-height: 1.34;
+      font-weight: 500;
     }
 
-    .slider-group {
-      margin-bottom: 14px;
+    .instructions strong {
+      font-weight: 800;
     }
 
-    .label-row {
+    .group {
+      margin-bottom: 16px;
+    }
+
+    .row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 6px;
       gap: 10px;
+      margin-bottom: 8px;
     }
 
-    .label-row label {
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: #f8fafc;
-    }
-
-    .value-box {
+    .row label {
+      font-size: 1rem;
       font-weight: 800;
-      font-size: 0.95rem;
-      color: #14532d;
-      background: #facc15;
-      padding: 4px 10px;
+      color: #f4f7ef;
+      letter-spacing: -0.01em;
+    }
+
+    .pill {
+      background: var(--yellow);
+      color: var(--dark-green);
+      font-weight: 900;
+      font-size: 0.96rem;
+      line-height: 1;
+      padding: 9px 14px;
       border-radius: 999px;
-      min-width: 74px;
+      min-width: 108px;
       text-align: center;
       box-shadow: inset 0 -1px 0 rgba(0,0,0,0.08);
+      white-space: nowrap;
     }
 
     input[type="range"] {
@@ -92,159 +127,198 @@
       -webkit-appearance: none;
       height: 8px;
       border-radius: 999px;
-      background: linear-gradient(90deg, #86efac, #facc15);
+      background: linear-gradient(90deg, #87efac 0%, #c9df67 50%, #f1cd1c 100%);
       outline: none;
     }
 
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
-      background: #ffffff;
-      border: 3px solid #166534;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      background: #f3f4ef;
+      border: 4px solid #1d7b46;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
     }
 
     input[type="range"]::-moz-range-thumb {
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
-      background: #ffffff;
-      border: 3px solid #166534;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      background: #f3f4ef;
+      border: 4px solid #1d7b46;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
     }
 
     select {
       width: 100%;
-      padding: 11px 12px;
-      border-radius: 12px;
+      background: rgba(255,255,255,0.14);
+      color: #ffffff;
       border: 1px solid rgba(255,255,255,0.18);
-      background: rgba(255,255,255,0.12);
-      color: white;
-      font-size: 0.96rem;
-      font-weight: 700;
-      margin-bottom: 14px;
+      border-radius: 14px;
+      padding: 14px 14px;
+      font-size: 1rem;
+      font-weight: 800;
+      outline: none;
     }
 
     option {
-      color: black;
+      color: #111;
     }
 
     .results {
       display: grid;
-      gap: 10px;
-      margin-bottom: 14px;
+      gap: 12px;
+      margin: 10px 0 14px;
     }
 
-    .result-box {
-      background: linear-gradient(135deg, rgba(250,204,21,0.18), rgba(255,255,255,0.08));
+    .result-card {
+      background: linear-gradient(180deg, rgba(211,194,104,0.16), rgba(232,234,215,0.11));
       border: 1px solid rgba(255,255,255,0.14);
-      border-radius: 14px;
-      padding: 12px;
+      border-radius: 16px;
+      padding: 14px 14px 16px;
     }
 
     .result-title {
-      font-size: 0.84rem;
-      color: #dcfce7;
-      margin-bottom: 4px;
-      font-weight: 700;
+      color: #eef3dc;
+      font-size: 0.9rem;
+      font-weight: 900;
+      letter-spacing: 0.02em;
       text-transform: uppercase;
-      letter-spacing: 0.4px;
+      margin-bottom: 6px;
     }
 
     .result-value {
-      font-size: 1.45rem;
+      color: var(--cream);
+      font-size: clamp(2rem, 7vw, 2.6rem);
+      line-height: 1.03;
       font-weight: 900;
-      color: #fef3c7;
+      letter-spacing: -0.04em;
     }
 
     .comments {
-      margin-top: 10px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 14px;
-      padding: 12px;
-      border: 1px solid rgba(255,255,255,0.12);
+      margin-top: 8px;
+      background: rgba(245, 242, 230, 0.18);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 18px;
+      padding: 14px;
+      color: #f9faf6;
     }
 
     .comments h2 {
-      margin: 0 0 8px;
-      font-size: 1rem;
-      color: #f7e7b6;
+      margin: 0 0 12px;
+      color: var(--cream);
+      font-size: 0.95rem;
+      font-weight: 900;
+      letter-spacing: -0.01em;
     }
 
-    .comment-line {
-      font-size: 0.9rem;
-      line-height: 1.38;
-      margin-bottom: 7px;
-      color: #f8fafc;
+    .comment {
+      margin: 0 0 10px;
+      font-size: 0.92rem;
+      line-height: 1.34;
+      color: #f5f7f0;
+      font-weight: 600;
     }
 
-    .comment-line:last-child {
+    .comment:last-child {
       margin-bottom: 0;
     }
 
-    .badge-good {
-      color: #bbf7d0;
-      font-weight: 800;
+    .comment strong {
+      color: #ffffff;
+      font-weight: 900;
     }
 
-    .badge-warn {
-      color: #fde68a;
-      font-weight: 800;
+    .good {
+      color: #baf3ca;
+      font-weight: 900;
     }
 
-    .badge-alert {
-      color: #fecaca;
-      font-weight: 800;
+    .warn {
+      color: var(--warn);
+      font-weight: 900;
+    }
+
+    .alert {
+      color: var(--alert);
+      font-weight: 900;
     }
 
     .credits {
       text-align: center;
-      margin-top: 12px;
-      font-size: 0.74rem;
-      color: #d1d5db;
+      margin-top: 14px;
+      color: rgba(240,240,235,0.75);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    @media (max-width: 390px) {
+      .app {
+        padding: 12px 10px 16px;
+      }
+
+      .instructions {
+        font-size: 0.96rem;
+        padding: 13px 13px 13px 15px;
+      }
+
+      .row label {
+        font-size: 0.96rem;
+      }
+
+      .pill {
+        min-width: 98px;
+        font-size: 0.92rem;
+        padding: 8px 12px;
+      }
+
+      .result-value {
+        font-size: 1.9rem;
+      }
+
+      .comment {
+        font-size: 0.89rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="card">
+  <div class="shell">
+    <div class="app">
       <h1>Analyse swing STM</h1>
 
-      <div class="mode-emploi">
-        <strong>Mode d’emploi :</strong> ajuste la vitesse de swing, la vitesse de balle, le VLA et le bâton. L’outil estime ensuite le <strong>carry</strong>, la distance <strong>totale</strong> et l’<strong>apex</strong>. Lis les commentaires en bas pour voir si les valeurs semblent optimales ou à surveiller.
+      <div class="instructions">
+        <strong>Mode d’emploi :</strong> ajuste la vitesse de swing, la vitesse de balle, le VLA et le bâton. L’outil estime ensuite le <strong>carry</strong>, la distance totale et l’<strong>apex</strong>. Lis les commentaires en bas pour voir si les valeurs semblent optimales ou à surveiller.
       </div>
 
-      <div class="slider-group">
-        <div class="label-row">
+      <div class="group">
+        <div class="row">
           <label for="clubSpeed">Club Speed</label>
-          <div class="value-box"><span id="clubSpeedVal">95</span> mph</div>
+          <div class="pill"><span id="clubSpeedVal">94</span> mph</div>
         </div>
-        <input type="range" id="clubSpeed" min="60" max="120" value="95">
+        <input type="range" id="clubSpeed" min="60" max="120" value="94">
       </div>
 
-      <div class="slider-group">
-        <div class="label-row">
+      <div class="group">
+        <div class="row">
           <label for="ballSpeed">Ball Speed</label>
-          <div class="value-box"><span id="ballSpeedVal">140</span> mph</div>
+          <div class="pill"><span id="ballSpeedVal">140</span> mph</div>
         </div>
         <input type="range" id="ballSpeed" min="80" max="190" value="140">
       </div>
 
-      <div class="slider-group">
-        <div class="label-row">
+      <div class="group">
+        <div class="row">
           <label for="launch">Launch Angle (VLA)</label>
-          <div class="value-box"><span id="launchVal">14</span>°</div>
+          <div class="pill"><span id="launchVal">14</span>°</div>
         </div>
         <input type="range" id="launch" min="5" max="30" value="14">
       </div>
 
-      <div class="slider-group">
-        <div class="label-row">
+      <div class="group">
+        <div class="row">
           <label for="club">Bâton</label>
         </div>
         <select id="club">
@@ -262,28 +336,28 @@
       </div>
 
       <div class="results">
-        <div class="result-box">
+        <div class="result-card">
           <div class="result-title">Carry</div>
-          <div class="result-value"><span id="carry">0</span> verges</div>
+          <div class="result-value"><span id="carry">248</span> verges</div>
         </div>
 
-        <div class="result-box">
+        <div class="result-card">
           <div class="result-title">Distance totale</div>
-          <div class="result-value"><span id="total">0</span> verges</div>
+          <div class="result-value"><span id="total">287</span> verges</div>
         </div>
 
-        <div class="result-box">
+        <div class="result-card">
           <div class="result-title">Apex</div>
-          <div class="result-value"><span id="apex">0</span> pieds</div>
+          <div class="result-value"><span id="apex">91</span> pieds</div>
         </div>
       </div>
 
       <div class="comments">
         <h2>Commentaires</h2>
-        <div class="comment-line" id="commentSmash">Smash factor : —</div>
-        <div class="comment-line" id="commentLaunch">Lancement : —</div>
-        <div class="comment-line" id="commentApex">Apex : —</div>
-        <div class="comment-line" id="commentGeneral">Lecture générale : —</div>
+        <p class="comment" id="commentSmash">Smash factor : <strong>1.49</strong> — <span class="good">bon transfert d’énergie</span></p>
+        <p class="comment" id="commentLaunch">Lancement : <span class="good">zone cohérente pour ce bâton (10° à 16°)</span></p>
+        <p class="comment" id="commentApex">Apex : <span class="good">trajectoire crédible</span></p>
+        <p class="comment" id="commentGeneral">Lecture générale : <span class="good">Profil global très cohérent pour ce bâton.</span></p>
       </div>
 
       <div class="credits">Crédits: Louis-Daniel Joly</div>
@@ -328,10 +402,10 @@
       return "good";
     }
 
-    function badgeText(state, goodText, lowText, highText) {
-      if (state === "good") return `<span class="badge-good">${goodText}</span>`;
-      if (state === "low") return `<span class="badge-warn">${lowText}</span>`;
-      return `<span class="badge-alert">${highText}</span>`;
+    function spanByState(state, goodText, lowText, highText) {
+      if (state === "good") return `<span class="good">${goodText}</span>`;
+      if (state === "low") return `<span class="warn">${lowText}</span>`;
+      return `<span class="alert">${highText}</span>`;
     }
 
     function update() {
@@ -348,10 +422,9 @@
       const smash = bs / cs;
 
       let carry = bs * data.carryFactor * 1.78;
-      let total = carry * data.totalFactor;
+      carry += (cs - 95) * 0.9;
 
-      const speedAdjustment = (cs - 95) * 0.9;
-      carry += speedAdjustment;
+      let total = carry * data.totalFactor;
 
       const apexTarget = data.apexBase + (la - ((data.vlaMin + data.vlaMax) / 2)) * data.apexSlope;
       let apex = apexTarget + (cs - 95) * 0.7;
@@ -373,47 +446,36 @@
 
       commentSmash.innerHTML =
         `Smash factor : <strong>${smash.toFixed(2)}</strong> — ` +
-        badgeText(
-          smashState,
-          "bon transfert d’énergie",
-          "contact possiblement moins efficace",
-          "valeur élevée, à valider"
-        );
+        spanByState(smashState, "bon transfert d’énergie", "contact possiblement moins efficace", "valeur élevée, à valider");
 
       const launchState = classify(la, data.vlaMin, data.vlaMax);
       commentLaunch.innerHTML =
         `Lancement : ` +
-        badgeText(
-          launchState,
-          `zone cohérente pour ce bâton (${data.vlaMin}° à ${data.vlaMax}°)`,
-          `un peu bas pour ce bâton`,
-          `un peu haut pour ce bâton`
-        );
+        spanByState(launchState, `zone cohérente pour ce bâton (${data.vlaMin}° à ${data.vlaMax}°)`, "un peu bas pour ce bâton", "un peu haut pour ce bâton");
 
       const apexMin = data.apexBase - 10;
       const apexMax = data.apexBase + 12;
       const apexState = classify(apex, apexMin, apexMax);
       commentApex.innerHTML =
         `Apex : ` +
-        badgeText(
-          apexState,
-          `trajectoire crédible`,
-          `vol plus tendu que prévu`,
-          `vol plus haut que prévu`
-        );
+        spanByState(apexState, "trajectoire crédible", "vol plus tendu que prévu", "vol plus haut que prévu");
 
-      let general = "";
-      if (smashState === "good" && launchState === "good" && apexState === "good") {
-        general = `<span class="badge-good">Profil global très cohérent pour ce bâton.</span>`;
-      } else if (smashState === "low") {
-        general = `<span class="badge-warn">Bon point de départ, mais l’efficacité de contact pourrait limiter la distance.</span>`;
+      let generalState = "good";
+      let generalText = "Profil global très cohérent pour ce bâton.";
+
+      if (smashState === "low") {
+        generalState = "warn";
+        generalText = "Bon point de départ, mais l’efficacité de contact pourrait limiter la distance.";
       } else if (launchState !== "good") {
-        general = `<span class="badge-warn">Le VLA semble être la variable principale à surveiller ici.</span>`;
-      } else {
-        general = `<span class="badge-alert">Profil à interpréter avec prudence : certaines valeurs méritent validation terrain.</span>`;
+        generalState = "warn";
+        generalText = "Le VLA semble être la variable principale à surveiller ici.";
+      } else if (smashState === "high" || apexState === "high") {
+        generalState = "alert";
+        generalText = "Profil à valider avec des données terrain.";
       }
 
-      commentGeneral.innerHTML = `Lecture générale : ${general}`;
+      const generalClass = generalState === "good" ? "good" : generalState === "warn" ? "warn" : "alert";
+      commentGeneral.innerHTML = `Lecture générale : <span class="${generalClass}">${generalText}</span>`;
     }
 
     clubSpeed.addEventListener("input", update);

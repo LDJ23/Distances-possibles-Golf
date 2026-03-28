@@ -388,15 +388,21 @@
           <div class="tip info" id="smashComment">
             <strong>Smash :</strong> lecture en attente.
           </div>
+
+          <div class="tip info" id="apexComment">
+            <strong>Apex :</strong> qualité en attente.
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <script>
+    const SMASH_CAP = 1.50;
+
     const clubs = [
-      { key:"driver", label:"Driver", clubSpeed:94, ballSpeed:140, smashIdeal:1.48, smashMax:1.52, launch:13.2, apexYards:25, carry:218, roll:18 },
-      { key:"3w",    label:"3W",     clubSpeed:90, ballSpeed:132, smashIdeal:1.48, smashMax:1.51, launch:11.2, apexYards:23, carry:195, roll:14 },
+      { key:"driver", label:"Driver", clubSpeed:94, ballSpeed:140, smashIdeal:1.48, smashMax:1.50, launch:13.2, apexYards:25, carry:218, roll:18 },
+      { key:"3w",    label:"3W",     clubSpeed:90, ballSpeed:132, smashIdeal:1.48, smashMax:1.50, launch:11.2, apexYards:23, carry:195, roll:14 },
       { key:"7w",    label:"7W",     clubSpeed:85, ballSpeed:123, smashIdeal:1.46, smashMax:1.49, launch:12.7, apexYards:25, carry:174, roll:9  },
       { key:"4h",    label:"4H",     clubSpeed:83, ballSpeed:120, smashIdeal:1.45, smashMax:1.48, launch:13.4, apexYards:25, carry:171, roll:8  },
       { key:"5h",    label:"5H",     clubSpeed:81, ballSpeed:117, smashIdeal:1.44, smashMax:1.47, launch:14.0, apexYards:24, carry:166, roll:7  },
@@ -425,6 +431,7 @@
 
     const tipBox = document.getElementById("tipBox");
     const smashComment = document.getElementById("smashComment");
+    const apexComment = document.getElementById("apexComment");
 
     let selectedClub = clubs.find(c => c.key === "7i");
 
@@ -457,14 +464,22 @@
     function autoBallSpeedFromClubSpeed(){
       const cs = Number(clubSpeed.value);
       const suggested = Math.round(cs * selectedClub.smashIdeal);
-      ballSpeed.value = suggested;
+      ballSpeed.value = Math.min(suggested, Math.round(cs * SMASH_CAP));
+    }
+
+    function enforceSmashCap(){
+      const cs = Number(clubSpeed.value);
+      const maxBallSpeed = Math.round(cs * SMASH_CAP);
+      if (Number(ballSpeed.value) > maxBallSpeed) {
+        ballSpeed.value = maxBallSpeed;
+      }
     }
 
     function computeSmash(){
       const cs = Number(clubSpeed.value);
       const bs = Number(ballSpeed.value);
       if (cs <= 0) return 0;
-      return bs / cs;
+      return Math.min(bs / cs, SMASH_CAP);
     }
 
     function computeCarry(bs, launch){
@@ -485,7 +500,11 @@
       let apexFeet = selectedClub.apexYards * 3;
       apexFeet *= Math.pow(bsRatio, 1.15);
       apexFeet *= (1 + (launchDelta * 0.028));
-      apexFeet = clamp(apexFeet, selectedClub.apexYards * 3 * 0.72, selectedClub.apexYards * 3 * 1.45);
+      apexFeet = clamp(
+        apexFeet,
+        selectedClub.apexYards * 3 * 0.72,
+        selectedClub.apexYards * 3 * 1.45
+      );
 
       return Math.round(apexFeet);
     }
@@ -518,11 +537,11 @@
 
     function buildSmashComment(smash){
       const ideal = selectedClub.smashIdeal;
-      const max = selectedClub.smashMax;
+      const max = Math.min(selectedClub.smashMax, SMASH_CAP);
 
-      if (smash > max) {
+      if (smash >= max - 0.01) {
         smashComment.className = "tip warn";
-        smashComment.innerHTML = `<strong>Smash :</strong> ${smash.toFixed(2)} très élevé pour ${selectedClub.label}. À valider.`;
+        smashComment.innerHTML = `<strong>Smash :</strong> ${smash.toFixed(2)} au plafond réaliste pour ${selectedClub.label}.`;
       } else if (smash >= ideal - 0.03 && smash <= ideal + 0.02) {
         smashComment.className = "tip ok";
         smashComment.innerHTML = `<strong>Smash :</strong> ${smash.toFixed(2)} cohérent pour ${selectedClub.label}.`;
@@ -535,8 +554,27 @@
       }
     }
 
+    function buildApexComment(apexFeet){
+      const idealFeet = selectedClub.apexYards * 3;
+      const lowBound = idealFeet * 0.88;
+      const highBound = idealFeet * 1.12;
+
+      if (apexFeet >= lowBound && apexFeet <= highBound) {
+        apexComment.className = "tip ok";
+        apexComment.innerHTML = `<strong>Apex :</strong> hauteur très cohérente pour ${selectedClub.label} autour de ${idealFeet.toFixed(0)} pieds.`;
+      } else if (apexFeet < lowBound) {
+        apexComment.className = "tip warn";
+        apexComment.innerHTML = `<strong>Apex :</strong> un peu bas pour ${selectedClub.label}. Trajectoire possiblement trop tendue.`;
+      } else {
+        apexComment.className = "tip warn";
+        apexComment.innerHTML = `<strong>Apex :</strong> un peu haut pour ${selectedClub.label}. Trajectoire possiblement trop verticale.`;
+      }
+    }
+
     function updateDisplay(){
       const cs = Number(clubSpeed.value);
+      enforceSmashCap();
+
       const bs = Number(ballSpeed.value);
       const launch = Number(vla.value);
 
@@ -556,6 +594,7 @@
 
       buildLaunchTip(launch);
       buildSmashComment(smash);
+      buildApexComment(apexFeet);
     }
 
     clubSpeed.addEventListener("input", () => {
@@ -563,7 +602,11 @@
       updateDisplay();
     });
 
-    ballSpeed.addEventListener("input", updateDisplay);
+    ballSpeed.addEventListener("input", () => {
+      enforceSmashCap();
+      updateDisplay();
+    });
+
     vla.addEventListener("input", updateDisplay);
 
     setInputsFromClub(selectedClub);

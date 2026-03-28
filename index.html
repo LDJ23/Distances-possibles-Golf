@@ -13,19 +13,24 @@
 
   <style>
     :root {
-      --bg: #061b34;
-      --bg-2: #082443;
-      --panel: rgba(14, 37, 66, 0.92);
-      --panel-soft: rgba(17, 44, 78, 0.88);
-      --border: rgba(120, 170, 220, 0.18);
-      --text: #eef6ff;
+      --bg: #031a34;
+      --bg2: #05274a;
+      --panel: rgba(10, 32, 58, 0.94);
+      --panel2: rgba(14, 39, 69, 0.95);
+      --border: rgba(114, 158, 214, 0.18);
+      --border-strong: rgba(114, 158, 214, 0.28);
+      --text: #eef5ff;
       --muted: #a9bfd8;
-      --cyan: #63d7ff;
-      --green: #7cf0a8;
+      --cyan: #67d7ff;
+      --green: #7ceb9b;
       --yellow: #ffd35a;
-      --white: #ffffff;
-      --shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+      --orange: #ffb14a;
+      --orange-border: rgba(255, 177, 74, 0.65);
+      --orange-bg: rgba(255, 177, 74, 0.12);
+      --tip-bg: rgba(20, 70, 84, 0.9);
+      --tip-border: rgba(94, 196, 186, 0.24);
       --radius: 26px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
     }
 
     * {
@@ -36,8 +41,9 @@
     html, body {
       margin: 0;
       padding: 0;
+      min-height: 100%;
       background:
-        radial-gradient(circle at top, #0d335f 0%, #061a31 45%, #03111f 100%);
+        radial-gradient(circle at top, #0c315d 0%, #04182f 48%, #02101f 100%);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
     }
@@ -47,9 +53,9 @@
     }
 
     .app {
-      max-width: 430px;
+      width: min(100%, 700px);
       margin: 0 auto;
-      background: linear-gradient(180deg, rgba(8,34,60,0.96), rgba(4,24,46,0.98));
+      background: linear-gradient(180deg, rgba(7,34,61,0.97), rgba(4,24,46,0.98));
       border: 1px solid rgba(120, 170, 220, 0.16);
       border-radius: 28px;
       overflow: hidden;
@@ -57,430 +63,59 @@
     }
 
     .hero {
-      padding: 20px 16px 16px;
-      background: linear-gradient(180deg, rgba(25,57,92,0.9), rgba(9,30,55,0.55));
+      padding: 16px 16px 12px;
+      background: linear-gradient(180deg, rgba(22,53,89,0.92), rgba(9,30,55,0.55));
     }
 
     .title {
-      margin: 0 0 8px;
-      font-size: clamp(2rem, 6.5vw, 2.7rem);
-      line-height: 0.98;
+      margin: 0 0 6px;
+      font-size: clamp(2.1rem, 5.2vw, 3.4rem);
+      line-height: 0.95;
       font-weight: 900;
-      letter-spacing: -0.04em;
+      letter-spacing: -0.05em;
       color: var(--text);
     }
 
     .subtitle {
       margin: 0;
-      font-size: 1.02rem;
-      line-height: 1.34;
+      font-size: clamp(0.98rem, 2vw, 1.14rem);
+      line-height: 1.26;
       color: var(--muted);
-      font-weight: 600;
+      font-weight: 650;
+      max-width: 95%;
     }
 
     .content {
-      padding: 14px 12px 18px;
+      padding: 12px 12px 14px;
     }
 
     .club-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 16px;
+      gap: 10px;
+      margin-bottom: 12px;
     }
 
     .club-btn {
       border: 1px solid rgba(116, 154, 210, 0.18);
-      background: rgba(8, 27, 52, 0.85);
+      background: rgba(8, 27, 52, 0.84);
       color: var(--text);
-      border-radius: 22px;
-      min-height: 68px;
-      font-size: 1rem;
+      border-radius: 20px;
+      min-height: 58px;
+      font-size: clamp(0.9rem, 2vw, 1rem);
       font-weight: 800;
       cursor: pointer;
-      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+      transition: 0.15s ease;
       box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
     }
 
     .club-btn.active {
-      background: linear-gradient(180deg, rgba(33,87,141,0.9), rgba(24,67,117,0.92));
-      border-color: rgba(99, 215, 255, 0.7);
+      background: linear-gradient(180deg, rgba(45,101,160,0.92), rgba(29,77,128,0.95));
+      border-color: rgba(99, 215, 255, 0.78);
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,0.06),
-        0 0 0 1px rgba(99, 215, 255, 0.2);
+        0 0 0 1px rgba(99,215,255,0.18);
     }
 
-    .slider-card {
-      background: linear-gradient(180deg, rgba(14,38,66,0.96), rgba(12,34,60,0.96));
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 14px 14px 18px;
-      margin-bottom: 14px;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
-    }
-
-    .slider-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    .slider-label {
-      font-size: 1.02rem;
-      font-weight: 800;
-      color: var(--text);
-      letter-spacing: -0.02em;
-    }
-
-    .slider-value {
-      font-size: 1rem;
-      font-weight: 900;
-      color: var(--cyan);
-      white-space: nowrap;
-    }
-
-    input[type="range"] {
-      width: 100%;
-      appearance: none;
-      -webkit-appearance: none;
-      height: 7px;
-      border-radius: 999px;
-      background: linear-gradient(90deg, #58ccff 0%, #69e2df 50%, #7bee9b 100%);
-      outline: none;
-      margin: 0;
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: #f7f8fb;
-      border: 4px solid #11345a;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
-    }
-
-    input[type="range"]::-moz-range-thumb {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: #f7f8fb;
-      border: 4px solid #11345a;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
-    }
-
-    .stats-grid {
+    .controls-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-      margin: 18px 0 16px;
-    }
-
-    .stat-card {
-      background: linear-gradient(180deg, rgba(16,41,73,0.96), rgba(11,31,58,0.96));
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 18px 14px;
-      min-height: 150px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .stat-title {
-      font-size: 0.86rem;
-      font-weight: 800;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 8px;
-    }
-
-    .stat-value {
-      font-size: clamp(2.6rem, 9vw, 3.25rem);
-      line-height: 0.95;
-      font-weight: 900;
-      letter-spacing: -0.05em;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
-
-    .stat-unit {
-      font-size: 0.92rem;
-      color: var(--muted);
-      font-weight: 700;
-    }
-
-    .tip {
-      background: linear-gradient(90deg, rgba(23,72,87,0.92), rgba(19,58,71,0.92));
-      border: 1px solid rgba(94, 196, 186, 0.28);
-      border-radius: 24px;
-      padding: 16px 16px;
-      margin-bottom: 12px;
-      font-size: 0.98rem;
-      line-height: 1.34;
-      color: var(--text);
-      font-weight: 600;
-    }
-
-    .tip strong {
-      color: var(--yellow);
-      font-weight: 900;
-    }
-
-    .footnote {
-      margin-top: 8px;
-      font-size: 0.88rem;
-      line-height: 1.38;
-      color: var(--muted);
-      font-weight: 600;
-    }
-
-    .credits {
-      margin-top: 12px;
-      text-align: center;
-      font-size: 0.82rem;
-      color: rgba(220, 232, 245, 0.78);
-      font-weight: 600;
-    }
-
-    @media (max-width: 390px) {
-      .hero {
-        padding: 18px 14px 14px;
-      }
-
-      .content {
-        padding: 12px 10px 16px;
-      }
-
-      .club-grid {
-        gap: 10px;
-      }
-
-      .club-btn {
-        min-height: 62px;
-        font-size: 0.96rem;
-        border-radius: 20px;
-      }
-
-      .slider-card {
-        padding: 13px 12px 16px;
-      }
-
-      .stat-card {
-        min-height: 138px;
-        border-radius: 22px;
-      }
-
-      .tip {
-        font-size: 0.95rem;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="app">
-    <div class="hero">
-      <h1 class="title">Distances possibles Golf</h1>
-      <p class="subtitle">
-        Simulateur pédagogique simple : ajuste la vitesse, le lancement et observe le carry, le total, l’apex et le smash factor.
-      </p>
-    </div>
-
-    <div class="content">
-      <div class="club-grid" id="clubGrid">
-        <button class="club-btn" data-club="driver">Driver</button>
-        <button class="club-btn" data-club="3w">3W</button>
-        <button class="club-btn" data-club="7w">7W</button>
-        <button class="club-btn" data-club="4h">4H</button>
-        <button class="club-btn" data-club="5h">5H</button>
-        <button class="club-btn" data-club="f4">F4</button>
-        <button class="club-btn" data-club="f5">F5</button>
-        <button class="club-btn" data-club="f6">F6</button>
-        <button class="club-btn active" data-club="f7">F7</button>
-        <button class="club-btn" data-club="f8">F8</button>
-        <button class="club-btn" data-club="f9">F9</button>
-        <button class="club-btn" data-club="pw">PW</button>
-      </div>
-
-      <div class="slider-card">
-        <div class="slider-top">
-          <div class="slider-label">Club speed</div>
-          <div class="slider-value"><span id="clubSpeedVal">89</span> mph</div>
-        </div>
-        <input type="range" id="clubSpeed" min="55" max="125" value="89" />
-      </div>
-
-      <div class="slider-card">
-        <div class="slider-top">
-          <div class="slider-label">Ball speed</div>
-          <div class="slider-value"><span id="ballSpeedVal">114</span> mph</div>
-        </div>
-        <input type="range" id="ballSpeed" min="70" max="195" value="114" />
-      </div>
-
-      <div class="slider-card">
-        <div class="slider-top">
-          <div class="slider-label">VLA</div>
-          <div class="slider-value"><span id="launchVal">18.0</span>°</div>
-        </div>
-        <input type="range" id="launch" min="4" max="30" step="0.1" value="18.0" />
-      </div>
-
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-title">Carry</div>
-          <div class="stat-value" id="carry">135</div>
-          <div class="stat-unit">verges</div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-title">Total</div>
-          <div class="stat-value" id="total">139</div>
-          <div class="stat-unit">verges</div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-title">Apex</div>
-          <div class="stat-value" id="apex">133</div>
-          <div class="stat-unit">pieds</div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-title">Smash</div>
-          <div class="stat-value" id="smash">1.28</div>
-          <div class="stat-unit">ratio</div>
-        </div>
-      </div>
-
-      <div class="tip" id="tip1">
-        <strong>Conseil :</strong> Très bon VLA pour F7. Tu es proche de la fenêtre idéale autour de 17°.
-      </div>
-
-      <div class="tip" id="tip2">
-        <strong>Lecture du smash :</strong> Smash cohérent (1.28) pour F7. Les données paraissent plausibles et compatibles avec un bon centrage.
-      </div>
-
-      <div class="footnote">
-        Modèle visuel simplifié. Les résultats sont des estimations pédagogiques. Le smash factor est interprété de manière critique pour aider à juger si les données semblent plausibles ou non.
-      </div>
-
-      <div class="credits">Crédits: Louis-Daniel Joly</div>
-    </div>
-  </div>
-
-  <script>
-    const clubButtons = document.querySelectorAll(".club-btn");
-    const clubSpeed = document.getElementById("clubSpeed");
-    const ballSpeed = document.getElementById("ballSpeed");
-    const launch = document.getElementById("launch");
-
-    const clubSpeedVal = document.getElementById("clubSpeedVal");
-    const ballSpeedVal = document.getElementById("ballSpeedVal");
-    const launchVal = document.getElementById("launchVal");
-
-    const carryEl = document.getElementById("carry");
-    const totalEl = document.getElementById("total");
-    const apexEl = document.getElementById("apex");
-    const smashEl = document.getElementById("smash");
-
-    const tip1 = document.getElementById("tip1");
-    const tip2 = document.getElementById("tip2");
-
-    let selectedClub = "f7";
-
-    const clubData = {
-      driver: { label: "Driver", smashMin: 1.43, smashMax: 1.52, vlaIdeal: 13, vlaLow: 10, vlaHigh: 16, roll: 1.14, apexBase: 92, apexSpeedFactor: 1.0, carryFactor: 2.00 },
-      "3w":   { label: "3W",     smashMin: 1.40, smashMax: 1.49, vlaIdeal: 14, vlaLow: 11, vlaHigh: 16, roll: 1.10, apexBase: 85, apexSpeedFactor: 0.92, carryFactor: 1.88 },
-      "7w":   { label: "7W",     smashMin: 1.38, smashMax: 1.47, vlaIdeal: 16, vlaLow: 13, vlaHigh: 18, roll: 1.07, apexBase: 95, apexSpeedFactor: 0.88, carryFactor: 1.73 },
-      "4h":   { label: "4H",     smashMin: 1.36, smashMax: 1.45, vlaIdeal: 15, vlaLow: 12, vlaHigh: 17, roll: 1.06, apexBase: 88, apexSpeedFactor: 0.84, carryFactor: 1.67 },
-      "5h":   { label: "5H",     smashMin: 1.34, smashMax: 1.43, vlaIdeal: 16, vlaLow: 13, vlaHigh: 18, roll: 1.05, apexBase: 93, apexSpeedFactor: 0.82, carryFactor: 1.61 },
-      "f4":   { label: "F4",     smashMin: 1.33, smashMax: 1.42, vlaIdeal: 14, vlaLow: 12, vlaHigh: 17, roll: 1.04, apexBase: 76, apexSpeedFactor: 0.80, carryFactor: 1.56 },
-      "f5":   { label: "F5",     smashMin: 1.31, smashMax: 1.40, vlaIdeal: 15, vlaLow: 13, vlaHigh: 18, roll: 1.035, apexBase: 84, apexSpeedFactor: 0.79, carryFactor: 1.50 },
-      "f6":   { label: "F6",     smashMin: 1.29, smashMax: 1.38, vlaIdeal: 16, vlaLow: 14, vlaHigh: 19, roll: 1.03, apexBase: 92, apexSpeedFactor: 0.77, carryFactor: 1.45 },
-      "f7":   { label: "F7",     smashMin: 1.27, smashMax: 1.36, vlaIdeal: 17, vlaLow: 15, vlaHigh: 20, roll: 1.025, apexBase: 101, apexSpeedFactor: 0.75, carryFactor: 1.39 },
-      "f8":   { label: "F8",     smashMin: 1.25, smashMax: 1.34, vlaIdeal: 19, vlaLow: 16, vlaHigh: 22, roll: 1.02, apexBase: 109, apexSpeedFactor: 0.73, carryFactor: 1.32 },
-      "f9":   { label: "F9",     smashMin: 1.22, smashMax: 1.31, vlaIdeal: 21, vlaLow: 18, vlaHigh: 24, roll: 1.015, apexBase: 118, apexSpeedFactor: 0.71, carryFactor: 1.24 },
-      pw:     { label: "PW",     smashMin: 1.18, smashMax: 1.28, vlaIdeal: 24, vlaLow: 20, vlaHigh: 28, roll: 1.01, apexBase: 124, apexSpeedFactor: 0.68, carryFactor: 1.12 }
-    };
-
-    function updateClubButtons() {
-      clubButtons.forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.club === selectedClub);
-      });
-    }
-
-    function formatLaunch(value) {
-      return Number(value).toFixed(1);
-    }
-
-    function update() {
-      const cs = parseFloat(clubSpeed.value);
-      const bs = parseFloat(ballSpeed.value);
-      const la = parseFloat(launch.value);
-      const c = clubData[selectedClub];
-
-      clubSpeedVal.textContent = Math.round(cs);
-      ballSpeedVal.textContent = Math.round(bs);
-      launchVal.textContent = formatLaunch(la);
-
-      const smash = bs / cs;
-
-      let carry = bs * c.carryFactor - 23;
-      carry += (cs - 89) * 0.55;
-      carry = Math.max(20, carry);
-
-      let total = carry * c.roll;
-      total = Math.max(carry, total);
-
-      let apex = c.apexBase + (la - c.vlaIdeal) * 5.5 + (cs - 89) * c.apexSpeedFactor;
-      apex = Math.max(20, apex);
-
-      carryEl.textContent = Math.round(carry);
-      totalEl.textContent = Math.round(total);
-      apexEl.textContent = Math.round(apex);
-      smashEl.textContent = smash.toFixed(2);
-
-      let vlaMsg = "";
-      if (la < c.vlaLow) {
-        vlaMsg = `VLA un peu bas pour ${c.label}. Tu es sous la fenêtre idéale autour de ${c.vlaIdeal}°.`;
-      } else if (la > c.vlaHigh) {
-        vlaMsg = `VLA un peu haut pour ${c.label}. Tu es au-dessus de la fenêtre idéale autour de ${c.vlaIdeal}°.`;
-      } else {
-        vlaMsg = `Très bon VLA pour ${c.label}. Tu es proche de la fenêtre idéale autour de ${c.vlaIdeal}°.`;
-      }
-
-      let smashMsg = "";
-      if (smash < c.smashMin) {
-        smashMsg = `Smash plutôt faible (${smash.toFixed(2)}) pour ${c.label}. Les données suggèrent un contact moins efficace ou une balle peu centrée.`;
-      } else if (smash > c.smashMax) {
-        smashMsg = `Smash élevé (${smash.toFixed(2)}) pour ${c.label}. Valeur intéressante, mais à valider avec prudence selon l’appareil utilisé.`;
-      } else {
-        smashMsg = `Smash cohérent (${smash.toFixed(2)}) pour ${c.label}. Les données paraissent plausibles et compatibles avec un bon centrage.`;
-      }
-
-      tip1.innerHTML = `<strong>Conseil :</strong> ${vlaMsg}`;
-      tip2.innerHTML = `<strong>Lecture du smash :</strong> ${smashMsg}`;
-    }
-
-    clubButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        selectedClub = btn.dataset.club;
-        updateClubButtons();
-        update();
-      });
-    });
-
-    clubSpeed.addEventListener("input", update);
-    ballSpeed.addEventListener("input", update);
-    launch.addEventListener("input", update);
-
-    updateClubButtons();
-    update();
-  </script>
-</body>
-</html>

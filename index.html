@@ -1,720 +1,225 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"
-  />
-  <title>Analyse swing STM</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analyse swing STM</title>
 
-  <style>
-    :root{
-      --bg-top:#0d1b12;
-      --bg-bottom:#183524;
-      --panel:#112417;
-      --panel-2:#17321f;
-      --card:#1a2f1f;
-      --card-2:#23402c;
-      --line:rgba(255,255,255,.08);
-      --text:#f4f7f1;
-      --muted:#bfd2c3;
-      --green:#81d37b;
-      --sand:#d8c08d;
-      --white:#ffffff;
-      --shadow:0 14px 30px rgba(0,0,0,.26);
-      --warn-bg:rgba(255,170,60,.16);
-      --warn-line:rgba(255,170,60,.55);
-      --warn-text:#ffd18f;
-    }
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#0f2a1c;
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
 
-    *{
-      box-sizing:border-box;
-      -webkit-tap-highlight-color:transparent;
-    }
+.app{
+width:100%;
+max-width:420px;
+padding:10px;
+}
 
-    html,body{
-      margin:0;
-      padding:0;
-      width:100%;
-      height:100%;
-      overflow:hidden;
-      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      background:
-        radial-gradient(circle at top center, rgba(129,211,123,.12), transparent 28%),
-        linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
-      color:var(--text);
-    }
+h1{
+margin:0;
+font-size:24px;
+}
 
-    body{
-      min-height:100dvh;
-    }
+.mode{
+font-size:12px;
+margin-bottom:8px;
+color:#ccc;
+}
 
-    .screen{
-      width:100%;
-      height:100dvh;
-      padding:
-        max(8px, env(safe-area-inset-top))
-        10px
-        max(10px, env(safe-area-inset-bottom))
-        10px;
-      overflow:hidden;
-      display:flex;
-      align-items:stretch;
-      justify-content:center;
-    }
+.club-grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:6px;
+margin-bottom:6px;
+}
 
-    .app{
-      width:100%;
-      max-width:430px;
-      height:100%;
-      display:flex;
-    }
+.club-btn{
+padding:8px;
+border:none;
+border-radius:10px;
+background:#1f3d2b;
+color:white;
+font-weight:bold;
+}
 
-    .panel{
-      width:100%;
-      height:100%;
-      background:
-        radial-gradient(circle at top right, rgba(216,192,141,.10), transparent 24%),
-        radial-gradient(circle at top left, rgba(129,211,123,.10), transparent 22%),
-        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
-      border:1px solid var(--line);
-      border-radius:24px;
-      box-shadow:var(--shadow);
-      padding:12px;
-      display:grid;
-      grid-template-rows:auto auto auto auto auto 1fr;
-      gap:8px;
-      overflow:hidden;
-    }
+.club-btn.active{
+background:#3c7a4c;
+}
 
-    .header{
-      padding:2px 2px 0;
-    }
+.slider{
+margin-bottom:6px;
+}
 
-    .title{
-      margin:0;
-      font-size:clamp(22px, 5vw, 28px);
-      line-height:1.02;
-      font-weight:900;
-      letter-spacing:-0.02em;
-    }
+.value{
+float:right;
+color:#d8c08d;
+}
 
-    .mode{
-      margin-top:6px;
-      font-size:12px;
-      line-height:1.3;
-      color:var(--muted);
-      background:rgba(255,255,255,.04);
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:8px 10px;
-    }
+.metric{
+background:#1f3d2b;
+padding:10px;
+border-radius:10px;
+text-align:center;
+margin:4px;
+}
 
-    .mode strong{
-      color:var(--sand);
-    }
+.metric.warning{
+background:#5c3b1a;
+}
 
-    .club-grid{
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:6px;
-    }
+.metrics{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:6px;
+}
 
-    .club-btn{
-      border:none;
-      border-radius:14px;
-      padding:10px 4px;
-      background:linear-gradient(180deg, var(--card), #15291b);
-      color:var(--text);
-      border:1px solid var(--line);
-      font-size:14px;
-      font-weight:850;
-      cursor:pointer;
-      transition:.14s ease;
-      min-height:42px;
-    }
-
-    .club-btn.active{
-      background:linear-gradient(180deg, #2d5b37, #23472d);
-      border-color:rgba(216,192,141,.55);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
-      color:#fff8ea;
-    }
-
-    .sliders{
-      display:grid;
-      gap:6px;
-    }
-
-    .slider-card{
-      background:rgba(255,255,255,.03);
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:8px 10px 10px;
-      transition:.15s ease;
-    }
-
-    .slider-card.warning{
-      background:var(--warn-bg);
-      border-color:var(--warn-line);
-      box-shadow:inset 0 0 0 1px rgba(255,170,60,.10);
-    }
-
-    .row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:6px;
-    }
-
-    .label{
-      font-size:13px;
-      font-weight:800;
-      letter-spacing:.01em;
-    }
-
-    .value{
-      font-size:13px;
-      font-weight:900;
-      color:var(--sand);
-      font-variant-numeric:tabular-nums;
-      white-space:nowrap;
-    }
-
-    .slider-card.warning .value{
-      color:var(--warn-text);
-    }
-
-    input[type="range"]{
-      width:100%;
-      appearance:none;
-      -webkit-appearance:none;
-      height:8px;
-      border-radius:999px;
-      background:linear-gradient(90deg, #6ec46c, #d8c08d);
-      outline:none;
-      margin:0;
-    }
-
-    input[type="range"]::-webkit-slider-thumb{
-      -webkit-appearance:none;
-      appearance:none;
-      width:24px;
-      height:24px;
-      border-radius:50%;
-      background:var(--white);
-      border:3px solid #294532;
-      box-shadow:0 2px 10px rgba(0,0,0,.28);
-      cursor:pointer;
-    }
-
-    input[type="range"]::-moz-range-thumb{
-      width:24px;
-      height:24px;
-      border-radius:50%;
-      background:var(--white);
-      border:3px solid #294532;
-      box-shadow:0 2px 10px rgba(0,0,0,.28);
-      cursor:pointer;
-    }
-
-    .metrics{
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:7px;
-    }
-
-    .metric{
-      background:linear-gradient(180deg, var(--panel-2), var(--card));
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:10px 8px;
-      text-align:center;
-      min-height:78px;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      transition:.15s ease;
-    }
-
-    .metric.warning{
-      background:linear-gradient(180deg, rgba(255,170,60,.16), rgba(255,170,60,.10));
-      border-color:var(--warn-line);
-      box-shadow:inset 0 0 0 1px rgba(255,170,60,.10);
-    }
-
-    .metric-k{
-      font-size:10px;
-      text-transform:uppercase;
-      letter-spacing:.12em;
-      color:var(--muted);
-      margin-bottom:5px;
-    }
-
-    .metric-v{
-      font-size:clamp(24px, 6vw, 34px);
-      line-height:1;
-      font-weight:950;
-      font-variant-numeric:tabular-nums;
-    }
-
-    .metric.warning .metric-v{
-      color:var(--warn-text);
-    }
-
-    .metric-u{
-      font-size:11px;
-      color:var(--muted);
-      margin-top:4px;
-    }
-
-    .feedback{
-      display:grid;
-      gap:6px;
-      align-content:start;
-    }
-
-    .tip{
-      border-radius:14px;
-      padding:9px 10px;
-      line-height:1.25;
-      font-size:12px;
-      border:1px solid rgba(255,255,255,.08);
-      overflow:hidden;
-    }
-
-    .tip strong{
-      color:var(--sand);
-    }
-
-    .tip.ok{
-      background:rgba(129,211,123,.10);
-      color:#effcef;
-    }
-
-    .tip.warn{
-      background:rgba(216,192,141,.10);
-      color:#fff8ea;
-    }
-
-    .tip.info{
-      background:rgba(255,255,255,.05);
-      color:#eef5ef;
-    }
-
-    @media (max-height: 760px){
-      .panel{
-        padding:10px;
-        gap:7px;
-      }
-
-      .club-btn{
-        min-height:38px;
-        padding:8px 2px;
-        font-size:13px;
-      }
-
-      .slider-card{
-        padding:7px 9px 8px;
-      }
-
-      .metric{
-        min-height:72px;
-        padding:8px 6px;
-      }
-
-      .mode{
-        font-size:11px;
-        padding:7px 9px;
-      }
-
-      .tip{
-        font-size:11px;
-        padding:8px 9px;
-      }
-    }
-  </style>
+.tip{
+font-size:12px;
+margin-top:4px;
+padding:6px;
+border-radius:8px;
+background:#1f3d2b;
+}
+</style>
 </head>
+
 <body>
-  <div class="screen">
-    <div class="app">
-      <div class="panel">
-        <div class="header">
-          <h1 class="title">Analyse swing STM</h1>
-          <div class="mode">
-            <strong>Mode d’emploi :</strong> choisis un bâton, ajuste les 3 curseurs, puis lis carry, total, apex et smash.
-          </div>
-        </div>
-
-        <div class="club-grid" id="clubGrid"></div>
-
-        <div class="sliders">
-          <div class="slider-card" id="clubSpeedCard">
-            <div class="row">
-              <div class="label">Club speed</div>
-              <div class="value" id="clubSpeedValue">76 mph</div>
-            </div>
-            <input id="clubSpeed" type="range" min="60" max="120" step="1" value="76" />
-          </div>
-
-          <div class="slider-card" id="ballSpeedCard">
-            <div class="row">
-              <div class="label">Ball speed</div>
-              <div class="value" id="ballSpeedValue">104 mph</div>
-            </div>
-            <input id="ballSpeed" type="range" min="80" max="185" step="1" value="104" />
-          </div>
-
-          <div class="slider-card" id="vlaCard">
-            <div class="row">
-              <div class="label">VLA</div>
-              <div class="value" id="vlaValue">19.0°</div>
-            </div>
-            <input id="vla" type="range" min="5" max="30" step="0.1" value="19" />
-          </div>
-        </div>
-
-        <div class="metrics">
-          <div class="metric">
-            <div class="metric-k">Carry</div>
-            <div class="metric-v" id="carryValue">0</div>
-            <div class="metric-u">verges</div>
-          </div>
-
-          <div class="metric">
-            <div class="metric-k">Total</div>
-            <div class="metric-v" id="totalValue">0</div>
-            <div class="metric-u">verges</div>
-          </div>
-
-          <div class="metric" id="apexMetric">
-            <div class="metric-k">Apex</div>
-            <div class="metric-v" id="apexValue">0</div>
-            <div class="metric-u">pieds</div>
-          </div>
-
-          <div class="metric" id="smashMetric">
-            <div class="metric-k">Smash</div>
-            <div class="metric-v" id="smashValue">0.00</div>
-            <div class="metric-u">ratio</div>
-          </div>
-        </div>
-
-        <div class="feedback">
-          <div class="tip ok" id="tipBox">
-            <strong>Fenêtre :</strong> ajuste le VLA pour rester proche de la fenêtre idéale du bâton.
-          </div>
-
-          <div class="tip info" id="smashComment">
-            <strong>Smash :</strong> lecture en attente.
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const SMASH_CAP = 1.50;
-
-    const clubs = [
-      { key:"driver", label:"Driver", clubSpeed:94, ballSpeed:140, smashIdeal:1.48, smashMax:1.50, launch:13.2, apexBase:100, carry:218, roll:18, apexMin:75, apexMax:122 },
-      { key:"3w",    label:"3W",     clubSpeed:90, ballSpeed:132, smashIdeal:1.48, smashMax:1.50, launch:11.2, apexBase:78,  carry:195, roll:14, apexMin:60, apexMax:96  },
-      { key:"7w",    label:"7W",     clubSpeed:85, ballSpeed:123, smashIdeal:1.46, smashMax:1.49, launch:12.7, apexBase:86,  carry:174, roll:9,  apexMin:68, apexMax:105 },
-      { key:"4h",    label:"4H",     clubSpeed:83, ballSpeed:120, smashIdeal:1.45, smashMax:1.48, launch:13.4, apexBase:82,  carry:171, roll:8,  apexMin:66, apexMax:100 },
-      { key:"5h",    label:"5H",     clubSpeed:81, ballSpeed:117, smashIdeal:1.44, smashMax:1.47, launch:14.0, apexBase:86,  carry:166, roll:7,  apexMin:68, apexMax:104 },
-      { key:"4i",    label:"F4",     clubSpeed:80, ballSpeed:116, smashIdeal:1.45, smashMax:1.47, launch:14.3, apexBase:72,  carry:169, roll:7,  apexMin:58, apexMax:90  },
-      { key:"5i",    label:"F5",     clubSpeed:79, ballSpeed:112, smashIdeal:1.43, smashMax:1.45, launch:14.8, apexBase:78,  carry:161, roll:6,  apexMin:62, apexMax:96  },
-      { key:"6i",    label:"F6",     clubSpeed:78, ballSpeed:109, smashIdeal:1.41, smashMax:1.43, launch:17.1, apexBase:84,  carry:152, roll:5,  apexMin:68, apexMax:102 },
-      { key:"7i",    label:"F7",     clubSpeed:76, ballSpeed:104, smashIdeal:1.38, smashMax:1.40, launch:19.0, apexBase:90,  carry:141, roll:4,  apexMin:72, apexMax:108 },
-      { key:"8i",    label:"F8",     clubSpeed:74, ballSpeed:100, smashIdeal:1.33, smashMax:1.35, launch:20.8, apexBase:94,  carry:130, roll:3,  apexMin:76, apexMax:112 },
-      { key:"9i",    label:"F9",     clubSpeed:72, ballSpeed:93,  smashIdeal:1.32, smashMax:1.34, launch:23.9, apexBase:98,  carry:119, roll:2,  apexMin:80, apexMax:116 },
-      { key:"pw",    label:"PW",     clubSpeed:70, ballSpeed:86,  smashIdeal:1.28, smashMax:1.30, launch:25.7, apexBase:92,  carry:107, roll:1,  apexMin:76, apexMax:110 }
-    ];
-
-    const clubGrid = document.getElementById("clubGrid");
-    const clubSpeed = document.getElementById("clubSpeed");
-    const ballSpeed = document.getElementById("ballSpeed");
-    const vla = document.getElementById("vla");
-
-    const clubSpeedValue = document.getElementById("clubSpeedValue");
-    const ballSpeedValue = document.getElementById("ballSpeedValue");
-    const vlaValue = document.getElementById("vlaValue");
-
-    const carryValue = document.getElementById("carryValue");
-    const totalValue = document.getElementById("totalValue");
-    const apexValue = document.getElementById("apexValue");
-    const smashValue = document.getElementById("smashValue");
-
-    const tipBox = document.getElementById("tipBox");
-    const smashComment = document.getElementById("smashComment");
-
-    const vlaCard = document.getElementById("vlaCard");
-    const apexMetric = document.getElementById("apexMetric");
-    const smashMetric = document.getElementById("smashMetric");
-
-    let selectedClub = clubs.find(c => c.key === "7i");
-
-    function clamp(value, min, max){
-      return Math.min(max, Math.max(min, value));
-    }
-
-    function renderClubs(){
-      clubGrid.innerHTML = "";
-      clubs.forEach((club) => {
-        const btn = document.createElement("button");
-        btn.className = "club-btn" + (club.key === selectedClub.key ? " active" : "");
-        btn.textContent = club.label;
-        btn.addEventListener("click", () => {
-          selectedClub = club;
-          setInputsFromClub(club);
-          renderClubs();
-          updateDisplay();
-        });
-        clubGrid.appendChild(btn);
-      });
-    }
-
-    function setInputsFromClub(club){
-      clubSpeed.value = Math.round(club.clubSpeed);
-      ballSpeed.value = Math.round(club.ballSpeed);
-      vla.value = club.launch.toFixed(1);
-    }
-
-    function autoBallSpeedFromClubSpeed(){
-      const cs = Number(clubSpeed.value);
-      const suggested = Math.round(cs * selectedClub.smashIdeal);
-      ballSpeed.value = Math.min(suggested, Math.round(cs * SMASH_CAP));
-    }
-
-    function enforceSmashCap(){
-      const cs = Number(clubSpeed.value);
-      const maxBallSpeed = Math.round(cs * SMASH_CAP);
-      if (Number(ballSpeed.value) > maxBallSpeed) {
-        ballSpeed.value = maxBallSpeed;
-      }
-    }
-
-    function computeSmash(){
-      const cs = Number(clubSpeed.value);
-      const bs = Number(ballSpeed.value);
-      if (cs <= 0) return 0;
-      return Math.min(bs / cs, SMASH_CAP);
-    }
-
-    function computeCarry(bs, launch){
-      const bsRatio = bs / selectedClub.ballSpeed;
-      const launchDelta = launch - selectedClub.launch;
-
-      let carry = selectedClub.carry * Math.pow(bsRatio, 1.72);
-      const launchFactor = 1 - (0.0032 * Math.pow(launchDelta, 2));
-      carry *= clamp(launchFactor, 0.90, 1.03);
-
-      return Math.round(Math.max(20, carry));
-    }
-
-    function getSpeedApexFactor(cs, refCs, clubKey){
-      const ratio = cs / refCs;
-
-      let exponent = 1.05;
-      if (clubKey === "driver") exponent = 1.16;
-      else if (["3w", "7w", "4h", "5h"].includes(clubKey)) exponent = 1.11;
-      else if (["4i", "5i", "6i"].includes(clubKey)) exponent = 1.07;
-      else exponent = 1.03;
-
-      return Math.pow(ratio, exponent);
-    }
-
-    function getLaunchApexFactor(launch, refLaunch, clubKey){
-      const delta = launch - refLaunch;
-
-      let sensitivity = 0.020;
-      if (clubKey === "driver") sensitivity = 0.024;
-      else if (["3w", "7w", "4h", "5h"].includes(clubKey)) sensitivity = 0.022;
-      else sensitivity = 0.018;
-
-      return clamp(1 + (delta * sensitivity), 0.86, 1.18);
-    }
-
-    function getBallSpeedApexFactor(bs, refBs, clubKey){
-      const ratio = bs / refBs;
-
-      let exponent = 0.28;
-      if (clubKey === "driver") exponent = 0.34;
-      else if (["3w", "7w", "4h", "5h"].includes(clubKey)) exponent = 0.31;
-
-      return Math.pow(ratio, exponent);
-    }
-
-    function computeApexFeet(bs, launch){
-      const cs = Number(clubSpeed.value);
-
-      let apexFeet = selectedClub.apexBase;
-
-      const speedFactor = getSpeedApexFactor(cs, selectedClub.clubSpeed, selectedClub.key);
-      const launchFactor = getLaunchApexFactor(launch, selectedClub.launch, selectedClub.key);
-      const ballSpeedFactor = getBallSpeedApexFactor(bs, selectedClub.ballSpeed, selectedClub.key);
-
-      apexFeet *= speedFactor;
-      apexFeet *= launchFactor;
-      apexFeet *= ballSpeedFactor;
-
-      apexFeet = clamp(apexFeet, selectedClub.apexMin, selectedClub.apexMax);
-
-      return Math.round(apexFeet);
-    }
-
-    function computeDynamicApexTarget(bs, launch){
-      const cs = Number(clubSpeed.value);
-
-      let target = selectedClub.apexBase;
-      target *= getSpeedApexFactor(cs, selectedClub.clubSpeed, selectedClub.key);
-      target *= getLaunchApexFactor(launch, selectedClub.launch, selectedClub.key);
-      target *= getBallSpeedApexFactor(bs, selectedClub.ballSpeed, selectedClub.key);
-
-      return clamp(target, selectedClub.apexMin, selectedClub.apexMax);
-    }
-
-    function computeTotal(carry, launch){
-      const launchDelta = launch - selectedClub.launch;
-
-      let roll = selectedClub.roll;
-      roll -= launchDelta * 0.45;
-      roll = clamp(roll, 0, selectedClub.roll + 5);
-
-      return Math.round(carry + roll);
-    }
-
-    function getLaunchStatus(launch){
-      const ideal = selectedClub.launch;
-      const gap = launch - ideal;
-
-      if (Math.abs(gap) <= 1.0) {
-        return { status: "good", ideal, gap };
-      } else if (gap < -1.0) {
-        return { status: "low", ideal, gap };
-      } else {
-        return { status: "high", ideal, gap };
-      }
-    }
-
-    function getSmashStatus(smash){
-      const ideal = selectedClub.smashIdeal;
-      const max = Math.min(selectedClub.smashMax, SMASH_CAP);
-
-      if (smash >= max - 0.01) return { status: "high", ideal, max };
-      if (smash >= ideal - 0.03 && smash <= ideal + 0.02) return { status: "good", ideal, max };
-      if (smash >= ideal - 0.08) return { status: "ok", ideal, max };
-      return { status: "low", ideal, max };
-    }
-
-    function getApexTolerance(clubKey){
-      if (clubKey === "driver") return 0.11;
-      if (["3w", "7w", "4h", "5h"].includes(clubKey)) return 0.10;
-      if (["4i", "5i", "6i"].includes(clubKey)) return 0.09;
-      return 0.08;
-    }
-
-    function getApexStatus(apexFeet, bs, launch){
-      const target = computeDynamicApexTarget(bs, launch);
-      const tol = getApexTolerance(selectedClub.key);
-
-      const lowBound = Math.round(target * (1 - tol));
-      const highBound = Math.round(target * (1 + tol));
-      const roundedTarget = Math.round(target);
-
-      if (apexFeet >= lowBound && apexFeet <= highBound) {
-        return { status: "good", target: roundedTarget, lowBound, highBound };
-      } else if (apexFeet < lowBound) {
-        return { status: "low", target: roundedTarget, lowBound, highBound };
-      } else {
-        return { status: "high", target: roundedTarget, lowBound, highBound };
-      }
-    }
-
-    function updateHighlights(launchStatus, smashStatus, apexStatus){
-      vlaCard.classList.toggle("warning", launchStatus.status !== "good");
-      smashMetric.classList.toggle("warning", smashStatus.status !== "good");
-      apexMetric.classList.toggle("warning", apexStatus.status !== "good");
-    }
-
-    function buildLaunchTip(launchStatus){
-      const ideal = launchStatus.ideal;
-
-      if (launchStatus.status === "good") {
-        tipBox.className = "tip ok";
-        tipBox.innerHTML = `<strong>Fenêtre :</strong> très bonne pour ${selectedClub.label}. Tu es proche de ${ideal.toFixed(1)}°.`;
-      } else if (launchStatus.status === "low") {
-        tipBox.className = "tip warn";
-        tipBox.innerHTML = `<strong>Fenêtre :</strong> launch un peu bas pour ${selectedClub.label}. Référence ≈ ${ideal.toFixed(1)}°.`;
-      } else {
-        tipBox.className = "tip warn";
-        tipBox.innerHTML = `<strong>Fenêtre :</strong> launch un peu haut pour ${selectedClub.label}. Référence ≈ ${ideal.toFixed(1)}°.`;
-      }
-    }
-
-    function buildSmashComment(smash, smashStatus){
-      if (smashStatus.status === "high") {
-        smashComment.className = "tip warn";
-        smashComment.innerHTML = `<strong>Smash :</strong> ${smash.toFixed(2)} au plafond réaliste pour ${selectedClub.label}.`;
-      } else if (smashStatus.status === "good") {
-        smashComment.className = "tip ok";
-        smashComment.innerHTML = `<strong>Smash :</strong> ${smash.toFixed(2)} cohérent pour ${selectedClub.label}.`;
-      } else if (smashStatus.status === "ok") {
-        smashComment.className = "tip info";
-        smashComment.innerHTML = `<strong>Smash :</strong> ${smash.toFixed(2)} correct, mais un peu sous la référence.`;
-      } else {
-        smashComment.className = "tip warn";
-        smashComment.innerHTML = `<strong>Smash :</strong> ${smash.toFixed(2)} faible. Perte d’énergie probable au contact.`;
-      }
-    }
-
-    function updateDisplay(){
-      const cs = Number(clubSpeed.value);
-      enforceSmashCap();
-
-      const bs = Number(ballSpeed.value);
-      const launch = Number(vla.value);
-
-      const smash = computeSmash();
-      const carry = computeCarry(bs, launch);
-      const total = computeTotal(carry, launch);
-      const apexFeet = computeApexFeet(bs, launch);
-
-      const launchStatus = getLaunchStatus(launch);
-      const smashStatus = getSmashStatus(smash);
-      const apexStatus = getApexStatus(apexFeet, bs, launch);
-
-      clubSpeedValue.textContent = `${cs} mph`;
-      ballSpeedValue.textContent = `${bs} mph`;
-      vlaValue.textContent = `${launch.toFixed(1)}°`;
-
-      carryValue.textContent = carry;
-      totalValue.textContent = total;
-      apexValue.textContent = apexFeet;
-      smashValue.textContent = smash.toFixed(2);
-
-      buildLaunchTip(launchStatus);
-      buildSmashComment(smash, smashStatus);
-      updateHighlights(launchStatus, smashStatus, apexStatus);
-    }
-
-    clubSpeed.addEventListener("input", () => {
-      autoBallSpeedFromClubSpeed();
-      updateDisplay();
-    });
-
-    ballSpeed.addEventListener("input", () => {
-      enforceSmashCap();
-      updateDisplay();
-    });
-
-    vla.addEventListener("input", updateDisplay);
-
-    setInputsFromClub(selectedClub);
-    renderClubs();
-    updateDisplay();
-  </script>
+<div class="app">
+
+<h1>Analyse swing STM</h1>
+<div class="mode">Ajuste les curseurs et analyse carry, apex et smash</div>
+
+<div class="club-grid" id="clubGrid"></div>
+
+<div class="slider">
+Club speed <span class="value" id="csVal"></span>
+<input type="range" id="cs" min="60" max="120">
+</div>
+
+<div class="slider">
+Ball speed <span class="value" id="bsVal"></span>
+<input type="range" id="bs" min="80" max="185">
+</div>
+
+<div class="slider">
+VLA <span class="value" id="vlaVal"></span>
+<input type="range" id="vla" min="5" max="30" step="0.1">
+</div>
+
+<div class="metrics">
+<div class="metric"><div>Carry</div><div id="carry"></div></div>
+<div class="metric"><div>Total</div><div id="total"></div></div>
+<div class="metric" id="apexBox"><div>Apex</div><div id="apex"></div></div>
+<div class="metric" id="smashBox"><div>Smash</div><div id="smash"></div></div>
+</div>
+
+<div class="tip" id="tip"></div>
+<div class="tip" id="smashTip"></div>
+
+</div>
+
+<script>
+const SMASH_CAP = 1.50;
+
+const clubs = [
+{label:"Driver", cs:94, bs:140, launch:13, apex:100, carry:218, roll:18},
+{label:"3W", cs:90, bs:132, launch:11, apex:80, carry:195, roll:14},
+{label:"7W", cs:85, bs:123, launch:13, apex:90, carry:174, roll:9},
+{label:"4H", cs:83, bs:120, launch:14, apex:85, carry:171, roll:8},
+{label:"5H", cs:81, bs:117, launch:14, apex:90, carry:166, roll:7},
+{label:"F4", cs:80, bs:116, launch:14, apex:75, carry:169, roll:7},
+{label:"F5", cs:79, bs:112, launch:15, apex:80, carry:161, roll:6},
+{label:"F6", cs:78, bs:109, launch:17, apex:85, carry:152, roll:5},
+{label:"F7", cs:76, bs:104, launch:19, apex:90, carry:141, roll:4},
+{label:"F8", cs:74, bs:100, launch:21, apex:95, carry:130, roll:3},
+{label:"F9", cs:72, bs:93, launch:24, apex:100, carry:119, roll:2},
+{label:"PW", cs:70, bs:86, launch:26, apex:95, carry:107, roll:1}
+];
+
+let club = clubs[8];
+
+const grid = document.getElementById("clubGrid");
+clubs.forEach(c=>{
+let b=document.createElement("button");
+b.innerText=c.label;
+b.className="club-btn";
+b.onclick=()=>{
+club=c;
+cs.value=c.cs;
+bs.value=c.bs;
+vla.value=c.launch;
+update();
+};
+grid.appendChild(b);
+});
+
+const cs=document.getElementById("cs");
+const bs=document.getElementById("bs");
+const vla=document.getElementById("vla");
+
+function update(){
+
+let csVal=Number(cs.value);
+let bsVal=Math.min(Number(bs.value), csVal*SMASH_CAP);
+bs.value=bsVal;
+
+let smash=bsVal/csVal;
+
+let carry=club.carry*Math.pow(bsVal/club.bs,1.7);
+let total=carry+club.roll;
+
+let apex=club.apex
+*Math.pow(csVal/club.cs,1.1)
+*(1+(vla.value-club.launch)*0.02)
+*Math.pow(bsVal/club.bs,0.3);
+
+apex=Math.round(apex);
+
+document.getElementById("csVal").innerText=csVal+" mph";
+document.getElementById("bsVal").innerText=bsVal+" mph";
+document.getElementById("vlaVal").innerText=vla.value+"°";
+
+document.getElementById("carry").innerText=Math.round(carry);
+document.getElementById("total").innerText=Math.round(total);
+document.getElementById("apex").innerText=apex;
+document.getElementById("smash").innerText=smash.toFixed(2);
+
+let apexBox=document.getElementById("apexBox");
+let smashBox=document.getElementById("smashBox");
+
+apexBox.classList.remove("warning");
+smashBox.classList.remove("warning");
+
+if(smash<1.3 || smash>1.5) smashBox.classList.add("warning");
+
+let idealApex=club.apex*Math.pow(csVal/club.cs,1.1);
+
+if(apex<idealApex*0.9 || apex>idealApex*1.1){
+apexBox.classList.add("warning");
+}
+
+document.getElementById("tip").innerText="Fenêtre idéale autour de "+club.launch+"°";
+document.getElementById("smashTip").innerText="Smash idéal proche de 1.45";
+}
+
+cs.oninput=update;
+bs.oninput=update;
+vla.oninput=update;
+
+cs.value=club.cs;
+bs.value=club.bs;
+vla.value=club.launch;
+
+update();
+</script>
+
 </body>
 </html>

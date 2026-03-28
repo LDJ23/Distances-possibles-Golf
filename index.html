@@ -1,277 +1,591 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Distances possibles Golf</title>
 
-<title>Analyse swing STM</title>
+  <meta property="og:title" content="Analyse swing STM - Simulateur golf">
+  <meta property="og:description" content="Teste tes distances, apex et trajectoire selon tes paramètres de swing">
+  <meta property="og:image" content="https://ldj23.github.io/Distances-possibles-Golf/preview.png">
+  <meta property="og:url" content="https://ldj23.github.io/Distances-possibles-Golf/">
+  <meta name="twitter:card" content="summary_large_image">
 
-<!-- Open Graph -->
-<meta property="og:title" content="Analyse swing STM - Simulateur golf">
-<meta property="og:description" content="Teste tes distances, apex et trajectoire selon tes paramètres de swing">
-<meta property="og:image" content="https://ldj23.github.io/Distances-possibles-Golf/preview.png">
-<meta property="og:url" content="https://ldj23.github.io/Distances-possibles-Golf/">
-<meta name="twitter:card" content="summary_large_image">
+  <style>
+    :root{
+      --bg:#031a34;
+      --bg2:#05274a;
+      --panel:rgba(10,32,58,.94);
+      --panel2:rgba(14,39,69,.95);
+      --border:rgba(114,158,214,.18);
+      --text:#eef5ff;
+      --muted:#a9bfd8;
+      --cyan:#67d7ff;
+      --green:#7ceb9b;
+      --yellow:#ffd35a;
+      --orange:#ffb14a;
+      --orange-border:rgba(255,177,74,.72);
+      --shadow:0 10px 28px rgba(0,0,0,.26);
+    }
 
-<style>
-body{
-margin:0;
-font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-background:linear-gradient(180deg,#061a2d,#0b2f4f);
-color:white;
-display:flex;
-justify-content:center;
-}
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
 
-.container{
-width:100%;
-max-width:420px;
-padding:12px;
-}
+    html,body{
+      margin:0;
+      padding:0;
+      background:radial-gradient(circle at top,#0c315d 0%,#04182f 48%,#02101f 100%);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,sans-serif;
+    }
 
-h1{
-text-align:center;
-font-size:22px;
-margin-bottom:8px;
-}
+    body{
+      padding:6px;
+    }
 
-.subtitle{
-text-align:center;
-font-size:12px;
-opacity:.7;
-margin-bottom:10px;
-}
+    .app{
+      width:min(100%,430px);
+      margin:0 auto;
+      background:linear-gradient(180deg,rgba(7,34,61,.97),rgba(4,24,46,.98));
+      border:1px solid rgba(120,170,220,.16);
+      border-radius:24px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+    }
 
-.clubs{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:6px;
-margin-bottom:10px;
-}
+    .hero{
+      padding:10px 12px 8px;
+      background:linear-gradient(180deg,rgba(22,53,89,.90),rgba(9,30,55,.45));
+    }
 
-.club-btn{
-padding:10px;
-border-radius:12px;
-border:1px solid rgba(255,255,255,.2);
-text-align:center;
-font-size:13px;
-cursor:pointer;
-}
+    .title{
+      margin:0 0 4px;
+      font-size:clamp(1.65rem,7vw,2.2rem);
+      line-height:.94;
+      font-weight:900;
+      letter-spacing:-.05em;
+    }
 
-.club-btn.active{
-background:#2b6cb0;
-}
+    .subtitle{
+      margin:0;
+      font-size:.9rem;
+      line-height:1.18;
+      color:var(--muted);
+      font-weight:650;
+    }
 
-.slider-box{
-background:rgba(255,255,255,.05);
-padding:10px;
-border-radius:14px;
-margin-bottom:8px;
-}
+    .content{
+      padding:8px 10px 10px;
+    }
 
-.slider-label{
-display:flex;
-justify-content:space-between;
-font-size:13px;
-margin-bottom:4px;
-}
+    .club-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:8px;
+      margin-bottom:8px;
+    }
 
-input[type=range]{
-width:100%;
-}
+    .club-btn{
+      border:1px solid rgba(116,154,210,.16);
+      background:rgba(8,27,52,.84);
+      color:var(--text);
+      border-radius:16px;
+      min-height:46px;
+      font-size:.84rem;
+      font-weight:800;
+      cursor:pointer;
+      transition:.15s ease;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.03);
+    }
 
-.results{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:8px;
-margin-top:10px;
-}
+    .club-btn.active{
+      background:linear-gradient(180deg,rgba(45,101,160,.92),rgba(29,77,128,.95));
+      border-color:rgba(99,215,255,.78);
+      box-shadow:0 0 0 1px rgba(99,215,255,.18);
+    }
 
-.card{
-padding:14px;
-border-radius:16px;
-text-align:center;
-background:rgba(255,255,255,.05);
-}
+    .controls-grid{
+      display:grid;
+      gap:8px;
+      margin-bottom:8px;
+    }
 
-.card.gold{
-background:linear-gradient(145deg,#3a2a12,#8b5e1a);
-}
+    .slider-card{
+      background:linear-gradient(180deg,rgba(14,38,66,.96),rgba(12,34,60,.96));
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:9px 10px 12px;
+      transition:.18s ease;
+    }
 
-.card.warn{
-outline:2px solid #ff6b6b;
-}
+    .slider-card.warn{
+      border-color:var(--orange-border);
+      background:linear-gradient(180deg,rgba(52,38,18,.96),rgba(42,29,12,.96));
+    }
 
-.value{
-font-size:24px;
-font-weight:bold;
-}
+    .slider-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+      margin-bottom:10px;
+    }
 
-.comment{
-margin-top:10px;
-padding:10px;
-border-radius:12px;
-background:rgba(0,255,180,.1);
-font-size:13px;
-}
+    .slider-label{
+      font-size:.9rem;
+      font-weight:800;
+    }
 
-.footer{
-margin-top:10px;
-font-size:11px;
-opacity:.6;
-text-align:center;
-}
-</style>
+    .slider-value{
+      font-size:.92rem;
+      font-weight:900;
+      color:var(--cyan);
+      white-space:nowrap;
+    }
+
+    .slider-card.warn .slider-value{
+      color:var(--orange);
+    }
+
+    input[type="range"]{
+      width:100%;
+      appearance:none;
+      -webkit-appearance:none;
+      height:6px;
+      border-radius:999px;
+      background:linear-gradient(90deg,#58ccff 0%,#69e2df 50%,#7bee9b 100%);
+      outline:none;
+      margin:0;
+    }
+
+    .slider-card.warn input[type="range"]{
+      background:linear-gradient(90deg,#ffd27b 0%,#ffbe63 50%,#ff9d42 100%);
+    }
+
+    input[type="range"]::-webkit-slider-thumb{
+      -webkit-appearance:none;
+      appearance:none;
+      width:22px;
+      height:22px;
+      border-radius:50%;
+      background:#f7f8fb;
+      border:3px solid #11345a;
+      box-shadow:0 3px 10px rgba(0,0,0,.25);
+    }
+
+    input[type="range"]::-moz-range-thumb{
+      width:22px;
+      height:22px;
+      border-radius:50%;
+      background:#f7f8fb;
+      border:3px solid #11345a;
+      box-shadow:0 3px 10px rgba(0,0,0,.25);
+    }
+
+    .stats-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:8px;
+      margin:8px 0;
+    }
+
+    .stat-card{
+      background:linear-gradient(180deg,rgba(16,41,73,.96),rgba(11,31,58,.96));
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:10px 8px;
+      min-height:94px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      transition:.18s ease;
+    }
+
+    .stat-card.warn{
+      border-color:var(--orange-border);
+      background:linear-gradient(180deg,rgba(52,38,18,.96),rgba(42,29,12,.96));
+    }
+
+    .stat-title{
+      font-size:.7rem;
+      font-weight:800;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      margin-bottom:5px;
+      text-align:center;
+    }
+
+    .stat-card.warn .stat-title{
+      color:#ffd48b;
+    }
+
+    .stat-value{
+      font-size:clamp(1.9rem,8vw,2.4rem);
+      line-height:.95;
+      font-weight:900;
+      letter-spacing:-.05em;
+      margin-bottom:3px;
+      text-align:center;
+    }
+
+    .stat-unit{
+      font-size:.82rem;
+      color:var(--muted);
+      font-weight:700;
+      text-align:center;
+    }
+
+    .stat-card.warn .stat-unit{
+      color:#ffd48b;
+    }
+
+    .tip{
+      background:linear-gradient(90deg,rgba(23,72,87,.92),rgba(19,58,71,.92));
+      border:1px solid rgba(94,196,186,.25);
+      border-radius:18px;
+      padding:10px 11px;
+      margin-bottom:8px;
+      font-size:.86rem;
+      line-height:1.22;
+      color:var(--text);
+      font-weight:600;
+    }
+
+    .tip strong{
+      color:var(--yellow);
+      font-weight:900;
+    }
+
+    .footnote{
+      margin-top:4px;
+      font-size:.74rem;
+      line-height:1.24;
+      color:var(--muted);
+      font-weight:600;
+    }
+
+    .credits{
+      margin-top:6px;
+      text-align:center;
+      font-size:.72rem;
+      color:rgba(220,232,245,.74);
+      font-weight:600;
+    }
+
+    @media (min-width:760px){
+      .app{
+        width:min(100%,920px);
+      }
+
+      .hero{
+        padding:12px 14px 9px;
+      }
+
+      .content{
+        padding:10px 12px 12px;
+      }
+
+      .club-grid{
+        grid-template-columns:repeat(7,1fr);
+      }
+
+      .controls-grid{
+        grid-template-columns:repeat(3,1fr);
+      }
+
+      .stats-grid{
+        grid-template-columns:repeat(4,1fr);
+      }
+
+      .stat-card{
+        min-height:110px;
+      }
+    }
+  </style>
 </head>
-
 <body>
-<div class="container">
+  <div class="app">
+    <div class="hero">
+      <h1 class="title">Distances possibles Golf</h1>
+      <p class="subtitle">
+        Simulateur pédagogique simple : ajuste la vitesse, le lancement et observe le carry, le total, l’apex et le smash factor.
+      </p>
+    </div>
 
-<h1>Analyse swing STM</h1>
-<div class="subtitle">Simulateur pédagogique basé sur TrackMan</div>
+    <div class="content">
+      <div class="club-grid" id="clubGrid">
+        <button class="club-btn active" data-club="driver">Driver</button>
+        <button class="club-btn" data-club="3w">3W</button>
+        <button class="club-btn" data-club="5w">5W</button>
+        <button class="club-btn" data-club="7w">7W</button>
+        <button class="club-btn" data-club="4h">H4</button>
+        <button class="club-btn" data-club="5h">H5</button>
+        <button class="club-btn" data-club="4i">F4</button>
+        <button class="club-btn" data-club="5i">F5</button>
+        <button class="club-btn" data-club="6i">F6</button>
+        <button class="club-btn" data-club="7i">F7</button>
+        <button class="club-btn" data-club="8i">F8</button>
+        <button class="club-btn" data-club="9i">F9</button>
+        <button class="club-btn" data-club="pw">PW</button>
+        <button class="club-btn" data-club="sw">SW</button>
+      </div>
 
-<div class="clubs">
-<div class="club-btn active" data-club="driver">Driver</div>
-<div class="club-btn" data-club="3w">3W</div>
-<div class="club-btn" data-club="5w">5W</div>
-<div class="club-btn" data-club="7w">7W</div>
-<div class="club-btn" data-club="4h">H4</div>
-<div class="club-btn" data-club="5h">H5</div>
-<div class="club-btn" data-club="4i">4I</div>
-<div class="club-btn" data-club="5i">5I</div>
-<div class="club-btn" data-club="6i">6I</div>
-<div class="club-btn" data-club="7i">7I</div>
-<div class="club-btn" data-club="8i">8I</div>
-<div class="club-btn" data-club="9i">9I</div>
-<div class="club-btn" data-club="pw">PW</div>
-<div class="club-btn" data-club="sw">SW</div>
-</div>
+      <div class="controls-grid">
+        <div class="slider-card" id="clubSpeedCard">
+          <div class="slider-top">
+            <div class="slider-label">Club speed</div>
+            <div class="slider-value"><span id="clubSpeedVal">94</span> mph</div>
+          </div>
+          <input type="range" id="clubSpeed" min="50" max="120" step="1" value="94" />
+        </div>
 
-<div class="slider-box">
-<div class="slider-label">Club speed <span id="csVal">95</span> mph</div>
-<input type="range" id="cs" min="60" max="110" value="95">
-</div>
+        <div class="slider-card" id="ballSpeedCard">
+          <div class="slider-top">
+            <div class="slider-label">Ball speed</div>
+            <div class="slider-value"><span id="ballSpeedVal">140</span> mph</div>
+          </div>
+          <input type="range" id="ballSpeed" min="60" max="190" step="1" value="140" />
+        </div>
 
-<div class="slider-box">
-<div class="slider-label">Ball speed <span id="bsVal">140</span> mph</div>
-<input type="range" id="bs" min="80" max="180" value="140">
-</div>
+        <div class="slider-card" id="launchCard">
+          <div class="slider-top">
+            <div class="slider-label">VLA</div>
+            <div class="slider-value"><span id="launchVal">13.2</span>°</div>
+          </div>
+          <input type="range" id="launch" min="5" max="35" step="0.1" value="13.2" />
+        </div>
+      </div>
 
-<div class="slider-box">
-<div class="slider-label">Launch angle <span id="laVal">13</span>°</div>
-<input type="range" id="la" min="5" max="35" value="13">
-</div>
+      <div class="stats-grid">
+        <div class="stat-card" id="carryCard">
+          <div class="stat-title">Carry</div>
+          <div class="stat-value" id="carry">218</div>
+          <div class="stat-unit">verges</div>
+        </div>
 
-<div class="results">
-<div class="card gold" id="carryCard">
-<div>CARRY</div>
-<div class="value" id="carry">0</div>
-<div>verges</div>
-</div>
+        <div class="stat-card" id="totalCard">
+          <div class="stat-title">Total</div>
+          <div class="stat-value" id="total">250</div>
+          <div class="stat-unit">verges</div>
+        </div>
 
-<div class="card gold" id="totalCard">
-<div>TOTAL</div>
-<div class="value" id="total">0</div>
-<div>verges</div>
-</div>
+        <div class="stat-card" id="apexCard">
+          <div class="stat-title">Apex</div>
+          <div class="stat-value" id="apex">75</div>
+          <div class="stat-unit">pieds</div>
+        </div>
 
-<div class="card gold" id="apexCard">
-<div>APEX</div>
-<div class="value" id="apex">0</div>
-<div>pieds</div>
-</div>
+        <div class="stat-card" id="smashCard">
+          <div class="stat-title">Smash</div>
+          <div class="stat-value" id="smash">1.48</div>
+          <div class="stat-unit">ratio</div>
+        </div>
+      </div>
 
-<div class="card" id="smashCard">
-<div>SMASH</div>
-<div class="value" id="smash">0</div>
-<div>ratio</div>
-</div>
-</div>
+      <div class="tip" id="tip1">
+        <strong>Conseil :</strong> Très bon VLA pour Driver. Tu es proche de la fenêtre idéale.
+      </div>
 
-<div class="comment" id="comment"></div>
+      <div class="tip" id="tip2">
+        <strong>Lecture du smash :</strong> Smash cohérent pour Driver. Les données paraissent plausibles et compatibles avec un bon centrage.
+      </div>
 
-<div class="footer">
-Crédits: Louis-Daniel Joly
-</div>
+      <div class="footnote">
+        Modèle visuel simplifié. Les résultats sont des estimations pédagogiques basées sur des repères TrackMan. Le total respecte maintenant une logique de roule plus réaliste selon chaque bâton.
+      </div>
 
-</div>
+      <div class="credits">Crédits: Louis-Daniel Joly</div>
+    </div>
+  </div>
 
-<script>
+  <script>
+    const clubButtons = document.querySelectorAll(".club-btn");
+    const clubSpeed = document.getElementById("clubSpeed");
+    const ballSpeed = document.getElementById("ballSpeed");
+    const launch = document.getElementById("launch");
 
-const data={
-driver:{cs:94,bs:140,la:13,carry:218,apex:75,smash:1.48,roll:25},
-"3w":{cs:90,bs:132,la:11,carry:195,apex:70,smash:1.48,roll:18},
-"5w":{cs:88,bs:128,la:12,carry:185,apex:78,smash:1.47,roll:14},
-"7w":{cs:85,bs:123,la:13,carry:174,apex:75,smash:1.46,roll:10},
-"4h":{cs:84,bs:121,la:14,carry:176,apex:72,smash:1.44,roll:8},
-"5h":{cs:81,bs:116,la:15,carry:166,apex:70,smash:1.43,roll:6},
-"4i":{cs:80,bs:116,la:14,carry:169,apex:72,smash:1.45,roll:5},
-"5i":{cs:79,bs:112,la:15,carry:161,apex:70,smash:1.43,roll:4},
-"6i":{cs:78,bs:109,la:17,carry:152,apex:75,smash:1.41,roll:3},
-"7i":{cs:76,bs:104,la:19,carry:141,apex:78,smash:1.38,roll:2},
-"8i":{cs:74,bs:100,la:21,carry:130,apex:75,smash:1.33,roll:2},
-"9i":{cs:72,bs:93,la:24,carry:119,apex:78,smash:1.32,roll:1},
-pw:{cs:70,bs:86,la:26,carry:107,apex:70,smash:1.28,roll:1},
-sw:{cs:62,bs:72,la:30,carry:86,apex:65,smash:1.16,roll:1}
-}
+    const clubSpeedVal = document.getElementById("clubSpeedVal");
+    const ballSpeedVal = document.getElementById("ballSpeedVal");
+    const launchVal = document.getElementById("launchVal");
 
-let club="driver"
+    const carryEl = document.getElementById("carry");
+    const totalEl = document.getElementById("total");
+    const apexEl = document.getElementById("apex");
+    const smashEl = document.getElementById("smash");
 
-document.querySelectorAll(".club-btn").forEach(btn=>{
-btn.onclick=()=>{
-document.querySelectorAll(".club-btn").forEach(b=>b.classList.remove("active"))
-btn.classList.add("active")
-club=btn.dataset.club
-update()
-}
-})
+    const launchCard = document.getElementById("launchCard");
+    const carryCard = document.getElementById("carryCard");
+    const totalCard = document.getElementById("totalCard");
+    const apexCard = document.getElementById("apexCard");
+    const smashCard = document.getElementById("smashCard");
 
-const cs=document.getElementById("cs")
-const bs=document.getElementById("bs")
-const la=document.getElementById("la")
+    const tip1 = document.getElementById("tip1");
+    const tip2 = document.getElementById("tip2");
 
-cs.oninput=bs.oninput=la.oninput=update
+    let selectedClub = "driver";
 
-function update(){
+    // Base inspirée du tableau TrackMan + logique de roule réaliste
+    const clubData = {
+      driver: { label:"Driver", clubSpeed:94, ballSpeed:140, smash:1.48, launch:13.2, apexYds:25, carry:218, minRoll:22, maxRoll:38 },
+      "3w":   { label:"3W", clubSpeed:90, ballSpeed:132, smash:1.48, launch:11.2, apexYds:23, carry:195, minRoll:14, maxRoll:26 },
+      "5w":   { label:"5W", clubSpeed:88, ballSpeed:128, smash:1.47, launch:12.1, apexYds:26, carry:185, minRoll:10, maxRoll:19 },
+      "7w":   { label:"7W", clubSpeed:85, ballSpeed:123, smash:1.46, launch:12.7, apexYds:25, carry:174, minRoll:7, maxRoll:14 },
 
-let d=data[club]
+      "4h":   { label:"H4", clubSpeed:84, ballSpeed:121, smash:1.44, launch:14.0, apexYds:24, carry:176, minRoll:8, maxRoll:15 },
+      "5h":   { label:"H5", clubSpeed:81, ballSpeed:116, smash:1.43, launch:15.5, apexYds:24, carry:166, minRoll:6, maxRoll:12 },
 
-let csV=+cs.value
-let bsV=+bs.value
-let laV=+la.value
+      "4i":   { label:"F4", clubSpeed:80, ballSpeed:116, smash:1.45, launch:14.3, apexYds:24, carry:169, minRoll:7, maxRoll:13 },
+      "5i":   { label:"F5", clubSpeed:79, ballSpeed:112, smash:1.43, launch:14.8, apexYds:23, carry:161, minRoll:6, maxRoll:11 },
+      "6i":   { label:"F6", clubSpeed:78, ballSpeed:109, smash:1.41, launch:17.1, apexYds:25, carry:152, minRoll:5, maxRoll:9 },
+      "7i":   { label:"F7", clubSpeed:76, ballSpeed:104, smash:1.38, launch:19.0, apexYds:26, carry:141, minRoll:4, maxRoll:8 },
+      "8i":   { label:"F8", clubSpeed:74, ballSpeed:100, smash:1.33, launch:20.8, apexYds:25, carry:130, minRoll:3, maxRoll:6 },
+      "9i":   { label:"F9", clubSpeed:72, ballSpeed:93,  smash:1.32, launch:23.9, apexYds:26, carry:119, minRoll:2, maxRoll:5 },
 
-document.getElementById("csVal").innerText=csV
-document.getElementById("bsVal").innerText=bsV
-document.getElementById("laVal").innerText=laV
+      pw:     { label:"PW", clubSpeed:70, ballSpeed:86, smash:1.28, launch:25.7, apexYds:23, carry:107, minRoll:1, maxRoll:3 },
+      sw:     { label:"SW", clubSpeed:62, ballSpeed:72, smash:1.16, launch:30.5, apexYds:21, carry:86, minRoll:0, maxRoll:2 }
+    };
 
-let smash=(bsV/csV).toFixed(2)
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
 
-let carry=d.carry*(bsV/d.bs)*(1-Math.abs(laV-d.la)*0.01)
-let total=carry+d.roll
-let apex=d.apex+(laV-d.la)*2
+    function toggleWarn(element, state) {
+      element.classList.toggle("warn", state);
+    }
 
-document.getElementById("carry").innerText=Math.round(carry)
-document.getElementById("total").innerText=Math.round(total)
-document.getElementById("apex").innerText=Math.round(apex)
-document.getElementById("smash").innerText=smash
+    function setDefaultsForClub(clubKey) {
+      const d = clubData[clubKey];
+      clubSpeed.value = d.clubSpeed;
+      ballSpeed.value = d.ballSpeed;
+      launch.value = d.launch;
+    }
 
-// reset warnings
-document.querySelectorAll(".card").forEach(c=>c.classList.remove("warn"))
+    function updateButtons() {
+      clubButtons.forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.club === selectedClub);
+      });
+    }
 
-// logique visuelle FIX
-if(Math.abs(laV-d.la)>4) document.getElementById("apexCard").classList.add("warn")
-if(Math.abs(smash-d.smash)>0.08) document.getElementById("smashCard").classList.add("warn")
+    function computeValues() {
+      const d = clubData[selectedClub];
+      const cs = parseFloat(clubSpeed.value);
+      const bs = parseFloat(ballSpeed.value);
+      const la = parseFloat(launch.value);
 
-document.getElementById("comment").innerText=
-smash>1.45?"🔥 Smash excellent":
-smash>1.35?"👍 Bon contact":
-"⚠️ Smash faible"
+      const smash = clamp(bs / cs, 0.9, 1.5);
 
-}
+      const csRatio = cs / d.clubSpeed;
+      const bsRatio = bs / d.ballSpeed;
+      const launchDelta = la - d.launch;
 
-update()
+      // Carry basé surtout sur ball speed, puis vitesse de club
+      let carry = d.carry * (0.34 * csRatio + 0.66 * bsRatio);
 
-</script>
+      // Pénalité si launch hors zone idéale
+      carry *= (1 - Math.min(Math.abs(launchDelta) * 0.010, 0.09));
 
+      // Influence légère du smash
+      carry *= (1 + ((smash - d.smash) * 0.10));
+
+      carry = clamp(carry, d.carry * 0.78, d.carry * 1.24);
+
+      // Roule réaliste selon le bâton
+      let rollBase = d.minRoll + ((d.maxRoll - d.minRoll) * 0.45);
+
+      // si plus de vitesse et launch plus bas → plus de roule
+      rollBase += (cs - d.clubSpeed) * 0.22;
+      rollBase += (bs - d.ballSpeed) * 0.10;
+      rollBase -= (la - d.launch) * 0.80;
+
+      let roll = clamp(rollBase, d.minRoll, d.maxRoll);
+      let total = carry + roll;
+
+      const baseApexFt = d.apexYds * 3;
+      let apex = baseApexFt + launchDelta * 3.2 + (cs - d.clubSpeed) * 0.55 + (bs - d.ballSpeed) * 0.16;
+      apex = clamp(apex, baseApexFt * 0.82, baseApexFt * 1.24);
+
+      return { d, cs, bs, la, smash, carry, total, apex, roll };
+    }
+
+    function update() {
+      const { d, cs, bs, la, smash, carry, total, apex } = computeValues();
+
+      clubSpeedVal.textContent = Math.round(cs);
+      ballSpeedVal.textContent = Math.round(bs);
+      launchVal.textContent = la.toFixed(1);
+
+      carryEl.textContent = Math.round(carry);
+      totalEl.textContent = Math.round(total);
+      apexEl.textContent = Math.round(apex);
+      smashEl.textContent = smash.toFixed(2);
+
+      const launchMin = d.launch - 1.8;
+      const launchMax = d.launch + 1.8;
+
+      const carryMin = d.carry * 0.90;
+      const carryMax = d.carry * 1.10;
+
+      const totalIdeal = d.carry + ((d.minRoll + d.maxRoll) / 2);
+      const totalMin = totalIdeal * 0.90;
+      const totalMax = totalIdeal * 1.10;
+
+      const apexIdeal = d.apexYds * 3;
+      const apexMin = apexIdeal * 0.86;
+      const apexMax = apexIdeal * 1.14;
+
+      const smashMin = Math.max(1.00, d.smash - 0.05);
+      const smashMax = Math.min(1.50, d.smash + 0.05);
+
+      const launchWarn = la < launchMin || la > launchMax;
+      const carryWarn = carry < carryMin || carry > carryMax;
+      const totalWarn = total < totalMin || total > totalMax;
+      const apexWarn = apex < apexMin || apex > apexMax;
+      const smashWarn = smash < smashMin || smash > smashMax;
+
+      toggleWarn(launchCard, launchWarn);
+      toggleWarn(carryCard, carryWarn);
+      toggleWarn(totalCard, totalWarn);
+      toggleWarn(apexCard, apexWarn);
+      toggleWarn(smashCard, smashWarn);
+
+      let launchMsg;
+      if (launchWarn) {
+        launchMsg = `VLA hors zone idéale pour ${d.label}. Cible réaliste : ${d.launch.toFixed(1)}° ± 1.8°.`;
+      } else {
+        launchMsg = `Très bon VLA pour ${d.label}. Tu es proche de la fenêtre idéale autour de ${d.launch.toFixed(1)}°.`;
+      }
+
+      let smashMsg;
+      if (smashWarn) {
+        smashMsg = `Smash à surveiller (${smash.toFixed(2)}) pour ${d.label}.`;
+      } else {
+        smashMsg = `Smash cohérent (${smash.toFixed(2)}) pour ${d.label}. Les données paraissent plausibles et compatibles avec un bon centrage.`;
+      }
+
+      tip1.innerHTML = `<strong>Conseil :</strong> ${launchMsg}`;
+      tip2.innerHTML = `<strong>Lecture du smash :</strong> ${smashMsg}`;
+    }
+
+    clubButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        selectedClub = btn.dataset.club;
+        updateButtons();
+        setDefaultsForClub(selectedClub);
+        update();
+      });
+    });
+
+    clubSpeed.addEventListener("input", update);
+    ballSpeed.addEventListener("input", update);
+    launch.addEventListener("input", update);
+
+    setDefaultsForClub(selectedClub);
+    updateButtons();
+    update();
+  </script>
 </body>
 </html>

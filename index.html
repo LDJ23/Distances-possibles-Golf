@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Analyse swing STM</title>
+  <title>Distances possibles Golf</title>
 
   <meta property="og:title" content="Analyse swing STM - Simulateur golf">
   <meta property="og:description" content="Teste tes distances, apex et trajectoire selon tes paramètres de swing">
@@ -13,19 +13,19 @@
 
   <style>
     :root {
-      --bg1: #0d4f2d;
-      --bg2: #2f6b46;
-      --card: rgba(255,255,255,0.08);
-      --card-border: rgba(255,255,255,0.14);
-      --soft-panel: rgba(255,255,255,0.12);
-      --yellow: #facc15;
-      --cream: #f5e8be;
-      --text: #f7f7ef;
-      --muted: #dce7d8;
-      --green-text: #c7f7d4;
-      --warn: #ffe08a;
-      --alert: #ffd0d0;
-      --dark-green: #16532f;
+      --bg: #061b34;
+      --bg-2: #082443;
+      --panel: rgba(14, 37, 66, 0.92);
+      --panel-soft: rgba(17, 44, 78, 0.88);
+      --border: rgba(120, 170, 220, 0.18);
+      --text: #eef6ff;
+      --muted: #a9bfd8;
+      --cyan: #63d7ff;
+      --green: #7cf0a8;
+      --yellow: #ffd35a;
+      --white: #ffffff;
+      --shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+      --radius: 26px;
     }
 
     * {
@@ -36,88 +36,108 @@
     html, body {
       margin: 0;
       padding: 0;
-      min-height: 100%;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
       background:
-        radial-gradient(circle at top, #0e6a39 0%, #155a34 26%, #2e6b46 58%, #9ead97 100%);
+        radial-gradient(circle at top, #0d335f 0%, #061a31 45%, #03111f 100%);
       color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
     }
 
     body {
-      padding: 8px;
-    }
-
-    .shell {
-      max-width: 430px;
-      margin: 0 auto;
-      padding: 8px 0 16px;
+      padding: 10px;
     }
 
     .app {
-      background: linear-gradient(180deg, rgba(31,91,53,0.92), rgba(72,122,88,0.82));
-      border: 1px solid rgba(255,255,255,0.16);
-      border-radius: 22px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.22);
-      padding: 14px 12px 18px;
-      backdrop-filter: blur(6px);
+      max-width: 430px;
+      margin: 0 auto;
+      background: linear-gradient(180deg, rgba(8,34,60,0.96), rgba(4,24,46,0.98));
+      border: 1px solid rgba(120, 170, 220, 0.16);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
     }
 
-    h1 {
-      margin: 2px 0 12px;
-      text-align: center;
-      font-size: clamp(1.9rem, 5.8vw, 2.35rem);
-      line-height: 1.05;
-      color: var(--cream);
-      font-weight: 800;
-      letter-spacing: -0.02em;
+    .hero {
+      padding: 20px 16px 16px;
+      background: linear-gradient(180deg, rgba(25,57,92,0.9), rgba(9,30,55,0.55));
     }
 
-    .instructions {
-      background: rgba(255,255,255,0.14);
-      border-left: 5px solid var(--yellow);
-      border-radius: 14px;
-      padding: 14px 14px 14px 16px;
-      margin-bottom: 16px;
-      color: #f7f7ef;
-      font-size: 1rem;
+    .title {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 6.5vw, 2.7rem);
+      line-height: 0.98;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      color: var(--text);
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 1.02rem;
       line-height: 1.34;
-      font-weight: 500;
+      color: var(--muted);
+      font-weight: 600;
     }
 
-    .instructions strong {
-      font-weight: 800;
+    .content {
+      padding: 14px 12px 18px;
     }
 
-    .group {
+    .club-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
       margin-bottom: 16px;
     }
 
-    .row {
+    .club-btn {
+      border: 1px solid rgba(116, 154, 210, 0.18);
+      background: rgba(8, 27, 52, 0.85);
+      color: var(--text);
+      border-radius: 22px;
+      min-height: 68px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+    }
+
+    .club-btn.active {
+      background: linear-gradient(180deg, rgba(33,87,141,0.9), rgba(24,67,117,0.92));
+      border-color: rgba(99, 215, 255, 0.7);
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.06),
+        0 0 0 1px rgba(99, 215, 255, 0.2);
+    }
+
+    .slider-card {
+      background: linear-gradient(180deg, rgba(14,38,66,0.96), rgba(12,34,60,0.96));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 14px 14px 18px;
+      margin-bottom: 14px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+
+    .slider-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 10px;
-      margin-bottom: 8px;
+      margin-bottom: 16px;
     }
 
-    .row label {
-      font-size: 1rem;
+    .slider-label {
+      font-size: 1.02rem;
       font-weight: 800;
-      color: #f4f7ef;
-      letter-spacing: -0.01em;
+      color: var(--text);
+      letter-spacing: -0.02em;
     }
 
-    .pill {
-      background: var(--yellow);
-      color: var(--dark-green);
+    .slider-value {
+      font-size: 1rem;
       font-weight: 900;
-      font-size: 0.96rem;
-      line-height: 1;
-      padding: 9px 14px;
-      border-radius: 999px;
-      min-width: 108px;
-      text-align: center;
-      box-shadow: inset 0 -1px 0 rgba(0,0,0,0.08);
+      color: var(--cyan);
       white-space: nowrap;
     }
 
@@ -125,239 +145,228 @@
       width: 100%;
       appearance: none;
       -webkit-appearance: none;
-      height: 8px;
+      height: 7px;
       border-radius: 999px;
-      background: linear-gradient(90deg, #87efac 0%, #c9df67 50%, #f1cd1c 100%);
+      background: linear-gradient(90deg, #58ccff 0%, #69e2df 50%, #7bee9b 100%);
       outline: none;
+      margin: 0;
     }
 
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
-      background: #f3f4ef;
-      border: 4px solid #1d7b46;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      background: #f7f8fb;
+      border: 4px solid #11345a;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
     }
 
     input[type="range"]::-moz-range-thumb {
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
-      background: #f3f4ef;
-      border: 4px solid #1d7b46;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      background: #f7f8fb;
+      border: 4px solid #11345a;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
     }
 
-    select {
-      width: 100%;
-      background: rgba(255,255,255,0.14);
-      color: #ffffff;
-      border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 14px;
-      padding: 14px 14px;
-      font-size: 1rem;
-      font-weight: 800;
-      outline: none;
-    }
-
-    option {
-      color: #111;
-    }
-
-    .results {
+    .stats-grid {
       display: grid;
-      gap: 12px;
-      margin: 10px 0 14px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin: 18px 0 16px;
     }
 
-    .result-card {
-      background: linear-gradient(180deg, rgba(211,194,104,0.16), rgba(232,234,215,0.11));
-      border: 1px solid rgba(255,255,255,0.14);
-      border-radius: 16px;
-      padding: 14px 14px 16px;
+    .stat-card {
+      background: linear-gradient(180deg, rgba(16,41,73,0.96), rgba(11,31,58,0.96));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 18px 14px;
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
 
-    .result-title {
-      color: #eef3dc;
-      font-size: 0.9rem;
-      font-weight: 900;
-      letter-spacing: 0.02em;
+    .stat-title {
+      font-size: 0.86rem;
+      font-weight: 800;
+      color: var(--muted);
       text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: clamp(2.6rem, 9vw, 3.25rem);
+      line-height: 0.95;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      color: var(--text);
       margin-bottom: 6px;
     }
 
-    .result-value {
-      color: var(--cream);
-      font-size: clamp(2rem, 7vw, 2.6rem);
-      line-height: 1.03;
-      font-weight: 900;
-      letter-spacing: -0.04em;
-    }
-
-    .comments {
-      margin-top: 8px;
-      background: rgba(245, 242, 230, 0.18);
-      border: 1px solid rgba(255,255,255,0.16);
-      border-radius: 18px;
-      padding: 14px;
-      color: #f9faf6;
-    }
-
-    .comments h2 {
-      margin: 0 0 12px;
-      color: var(--cream);
-      font-size: 0.95rem;
-      font-weight: 900;
-      letter-spacing: -0.01em;
-    }
-
-    .comment {
-      margin: 0 0 10px;
+    .stat-unit {
       font-size: 0.92rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .tip {
+      background: linear-gradient(90deg, rgba(23,72,87,0.92), rgba(19,58,71,0.92));
+      border: 1px solid rgba(94, 196, 186, 0.28);
+      border-radius: 24px;
+      padding: 16px 16px;
+      margin-bottom: 12px;
+      font-size: 0.98rem;
       line-height: 1.34;
-      color: #f5f7f0;
+      color: var(--text);
       font-weight: 600;
     }
 
-    .comment:last-child {
-      margin-bottom: 0;
-    }
-
-    .comment strong {
-      color: #ffffff;
+    .tip strong {
+      color: var(--yellow);
       font-weight: 900;
     }
 
-    .good {
-      color: #baf3ca;
-      font-weight: 900;
-    }
-
-    .warn {
-      color: var(--warn);
-      font-weight: 900;
-    }
-
-    .alert {
-      color: var(--alert);
-      font-weight: 900;
+    .footnote {
+      margin-top: 8px;
+      font-size: 0.88rem;
+      line-height: 1.38;
+      color: var(--muted);
+      font-weight: 600;
     }
 
     .credits {
+      margin-top: 12px;
       text-align: center;
-      margin-top: 14px;
-      color: rgba(240,240,235,0.75);
-      font-size: 0.8rem;
+      font-size: 0.82rem;
+      color: rgba(220, 232, 245, 0.78);
       font-weight: 600;
     }
 
     @media (max-width: 390px) {
-      .app {
+      .hero {
+        padding: 18px 14px 14px;
+      }
+
+      .content {
         padding: 12px 10px 16px;
       }
 
-      .instructions {
+      .club-grid {
+        gap: 10px;
+      }
+
+      .club-btn {
+        min-height: 62px;
         font-size: 0.96rem;
-        padding: 13px 13px 13px 15px;
+        border-radius: 20px;
       }
 
-      .row label {
-        font-size: 0.96rem;
+      .slider-card {
+        padding: 13px 12px 16px;
       }
 
-      .pill {
-        min-width: 98px;
-        font-size: 0.92rem;
-        padding: 8px 12px;
+      .stat-card {
+        min-height: 138px;
+        border-radius: 22px;
       }
 
-      .result-value {
-        font-size: 1.9rem;
-      }
-
-      .comment {
-        font-size: 0.89rem;
+      .tip {
+        font-size: 0.95rem;
       }
     }
   </style>
 </head>
 <body>
-  <div class="shell">
-    <div class="app">
-      <h1>Analyse swing STM</h1>
+  <div class="app">
+    <div class="hero">
+      <h1 class="title">Distances possibles Golf</h1>
+      <p class="subtitle">
+        Simulateur pédagogique simple : ajuste la vitesse, le lancement et observe le carry, le total, l’apex et le smash factor.
+      </p>
+    </div>
 
-      <div class="instructions">
-        <strong>Mode d’emploi :</strong> ajuste la vitesse de swing, la vitesse de balle, le VLA et le bâton. L’outil estime ensuite le <strong>carry</strong>, la distance totale et l’<strong>apex</strong>. Lis les commentaires en bas pour voir si les valeurs semblent optimales ou à surveiller.
+    <div class="content">
+      <div class="club-grid" id="clubGrid">
+        <button class="club-btn" data-club="driver">Driver</button>
+        <button class="club-btn" data-club="3w">3W</button>
+        <button class="club-btn" data-club="7w">7W</button>
+        <button class="club-btn" data-club="4h">4H</button>
+        <button class="club-btn" data-club="5h">5H</button>
+        <button class="club-btn" data-club="f4">F4</button>
+        <button class="club-btn" data-club="f5">F5</button>
+        <button class="club-btn" data-club="f6">F6</button>
+        <button class="club-btn active" data-club="f7">F7</button>
+        <button class="club-btn" data-club="f8">F8</button>
+        <button class="club-btn" data-club="f9">F9</button>
+        <button class="club-btn" data-club="pw">PW</button>
       </div>
 
-      <div class="group">
-        <div class="row">
-          <label for="clubSpeed">Club Speed</label>
-          <div class="pill"><span id="clubSpeedVal">94</span> mph</div>
+      <div class="slider-card">
+        <div class="slider-top">
+          <div class="slider-label">Club speed</div>
+          <div class="slider-value"><span id="clubSpeedVal">89</span> mph</div>
         </div>
-        <input type="range" id="clubSpeed" min="60" max="120" value="94">
+        <input type="range" id="clubSpeed" min="55" max="125" value="89" />
       </div>
 
-      <div class="group">
-        <div class="row">
-          <label for="ballSpeed">Ball Speed</label>
-          <div class="pill"><span id="ballSpeedVal">140</span> mph</div>
+      <div class="slider-card">
+        <div class="slider-top">
+          <div class="slider-label">Ball speed</div>
+          <div class="slider-value"><span id="ballSpeedVal">114</span> mph</div>
         </div>
-        <input type="range" id="ballSpeed" min="80" max="190" value="140">
+        <input type="range" id="ballSpeed" min="70" max="195" value="114" />
       </div>
 
-      <div class="group">
-        <div class="row">
-          <label for="launch">Launch Angle (VLA)</label>
-          <div class="pill"><span id="launchVal">14</span>°</div>
+      <div class="slider-card">
+        <div class="slider-top">
+          <div class="slider-label">VLA</div>
+          <div class="slider-value"><span id="launchVal">18.0</span>°</div>
         </div>
-        <input type="range" id="launch" min="5" max="30" value="14">
+        <input type="range" id="launch" min="4" max="30" step="0.1" value="18.0" />
       </div>
 
-      <div class="group">
-        <div class="row">
-          <label for="club">Bâton</label>
-        </div>
-        <select id="club">
-          <option value="driver">Driver</option>
-          <option value="3w">3 Wood</option>
-          <option value="7w">7 Wood</option>
-          <option value="4h">4 Hybrid</option>
-          <option value="5i">5 Iron</option>
-          <option value="6i">6 Iron</option>
-          <option value="7i">7 Iron</option>
-          <option value="8i">8 Iron</option>
-          <option value="9i">9 Iron</option>
-          <option value="pw">PW</option>
-        </select>
-      </div>
-
-      <div class="results">
-        <div class="result-card">
-          <div class="result-title">Carry</div>
-          <div class="result-value"><span id="carry">248</span> verges</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-title">Carry</div>
+          <div class="stat-value" id="carry">135</div>
+          <div class="stat-unit">verges</div>
         </div>
 
-        <div class="result-card">
-          <div class="result-title">Distance totale</div>
-          <div class="result-value"><span id="total">287</span> verges</div>
+        <div class="stat-card">
+          <div class="stat-title">Total</div>
+          <div class="stat-value" id="total">139</div>
+          <div class="stat-unit">verges</div>
         </div>
 
-        <div class="result-card">
-          <div class="result-title">Apex</div>
-          <div class="result-value"><span id="apex">91</span> pieds</div>
+        <div class="stat-card">
+          <div class="stat-title">Apex</div>
+          <div class="stat-value" id="apex">133</div>
+          <div class="stat-unit">pieds</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-title">Smash</div>
+          <div class="stat-value" id="smash">1.28</div>
+          <div class="stat-unit">ratio</div>
         </div>
       </div>
 
-      <div class="comments">
-        <h2>Commentaires</h2>
-        <p class="comment" id="commentSmash">Smash factor : <strong>1.49</strong> — <span class="good">bon transfert d’énergie</span></p>
-        <p class="comment" id="commentLaunch">Lancement : <span class="good">zone cohérente pour ce bâton (10° à 16°)</span></p>
-        <p class="comment" id="commentApex">Apex : <span class="good">trajectoire crédible</span></p>
-        <p class="comment" id="commentGeneral">Lecture générale : <span class="good">Profil global très cohérent pour ce bâton.</span></p>
+      <div class="tip" id="tip1">
+        <strong>Conseil :</strong> Très bon VLA pour F7. Tu es proche de la fenêtre idéale autour de 17°.
+      </div>
+
+      <div class="tip" id="tip2">
+        <strong>Lecture du smash :</strong> Smash cohérent (1.28) pour F7. Les données paraissent plausibles et compatibles avec un bon centrage.
+      </div>
+
+      <div class="footnote">
+        Modèle visuel simplifié. Les résultats sont des estimations pédagogiques. Le smash factor est interprété de manière critique pour aider à juger si les données semblent plausibles ou non.
       </div>
 
       <div class="credits">Crédits: Louis-Daniel Joly</div>
@@ -365,10 +374,10 @@
   </div>
 
   <script>
+    const clubButtons = document.querySelectorAll(".club-btn");
     const clubSpeed = document.getElementById("clubSpeed");
     const ballSpeed = document.getElementById("ballSpeed");
     const launch = document.getElementById("launch");
-    const club = document.getElementById("club");
 
     const clubSpeedVal = document.getElementById("clubSpeedVal");
     const ballSpeedVal = document.getElementById("ballSpeedVal");
@@ -377,112 +386,100 @@
     const carryEl = document.getElementById("carry");
     const totalEl = document.getElementById("total");
     const apexEl = document.getElementById("apex");
+    const smashEl = document.getElementById("smash");
 
-    const commentSmash = document.getElementById("commentSmash");
-    const commentLaunch = document.getElementById("commentLaunch");
-    const commentApex = document.getElementById("commentApex");
-    const commentGeneral = document.getElementById("commentGeneral");
+    const tip1 = document.getElementById("tip1");
+    const tip2 = document.getElementById("tip2");
+
+    let selectedClub = "f7";
 
     const clubData = {
-      driver: { carryFactor: 1.00, totalFactor: 1.15, apexBase: 90, apexSlope: 2.0, vlaMin: 10, vlaMax: 16, smashIdeal: 1.45, smashMax: 1.52 },
-      "3w":   { carryFactor: 0.93, totalFactor: 1.12, apexBase: 82, apexSlope: 1.8, vlaMin: 11, vlaMax: 16, smashIdeal: 1.43, smashMax: 1.50 },
-      "7w":   { carryFactor: 0.85, totalFactor: 1.08, apexBase: 90, apexSlope: 1.6, vlaMin: 13, vlaMax: 18, smashIdeal: 1.42, smashMax: 1.49 },
-      "4h":   { carryFactor: 0.82, totalFactor: 1.07, apexBase: 82, apexSlope: 1.5, vlaMin: 12, vlaMax: 17, smashIdeal: 1.40, smashMax: 1.48 },
-      "5i":   { carryFactor: 0.78, totalFactor: 1.05, apexBase: 78, apexSlope: 1.4, vlaMin: 13, vlaMax: 18, smashIdeal: 1.38, smashMax: 1.46 },
-      "6i":   { carryFactor: 0.75, totalFactor: 1.04, apexBase: 82, apexSlope: 1.35, vlaMin: 14, vlaMax: 19, smashIdeal: 1.36, smashMax: 1.45 },
-      "7i":   { carryFactor: 0.72, totalFactor: 1.03, apexBase: 86, apexSlope: 1.3, vlaMin: 15, vlaMax: 20, smashIdeal: 1.33, smashMax: 1.42 },
-      "8i":   { carryFactor: 0.69, totalFactor: 1.02, apexBase: 90, apexSlope: 1.25, vlaMin: 16, vlaMax: 21, smashIdeal: 1.30, smashMax: 1.40 },
-      "9i":   { carryFactor: 0.65, totalFactor: 1.01, apexBase: 94, apexSlope: 1.2, vlaMin: 17, vlaMax: 23, smashIdeal: 1.28, smashMax: 1.38 },
-      pw:     { carryFactor: 0.60, totalFactor: 1.00, apexBase: 98, apexSlope: 1.15, vlaMin: 19, vlaMax: 26, smashIdeal: 1.24, smashMax: 1.35 }
+      driver: { label: "Driver", smashMin: 1.43, smashMax: 1.52, vlaIdeal: 13, vlaLow: 10, vlaHigh: 16, roll: 1.14, apexBase: 92, apexSpeedFactor: 1.0, carryFactor: 2.00 },
+      "3w":   { label: "3W",     smashMin: 1.40, smashMax: 1.49, vlaIdeal: 14, vlaLow: 11, vlaHigh: 16, roll: 1.10, apexBase: 85, apexSpeedFactor: 0.92, carryFactor: 1.88 },
+      "7w":   { label: "7W",     smashMin: 1.38, smashMax: 1.47, vlaIdeal: 16, vlaLow: 13, vlaHigh: 18, roll: 1.07, apexBase: 95, apexSpeedFactor: 0.88, carryFactor: 1.73 },
+      "4h":   { label: "4H",     smashMin: 1.36, smashMax: 1.45, vlaIdeal: 15, vlaLow: 12, vlaHigh: 17, roll: 1.06, apexBase: 88, apexSpeedFactor: 0.84, carryFactor: 1.67 },
+      "5h":   { label: "5H",     smashMin: 1.34, smashMax: 1.43, vlaIdeal: 16, vlaLow: 13, vlaHigh: 18, roll: 1.05, apexBase: 93, apexSpeedFactor: 0.82, carryFactor: 1.61 },
+      "f4":   { label: "F4",     smashMin: 1.33, smashMax: 1.42, vlaIdeal: 14, vlaLow: 12, vlaHigh: 17, roll: 1.04, apexBase: 76, apexSpeedFactor: 0.80, carryFactor: 1.56 },
+      "f5":   { label: "F5",     smashMin: 1.31, smashMax: 1.40, vlaIdeal: 15, vlaLow: 13, vlaHigh: 18, roll: 1.035, apexBase: 84, apexSpeedFactor: 0.79, carryFactor: 1.50 },
+      "f6":   { label: "F6",     smashMin: 1.29, smashMax: 1.38, vlaIdeal: 16, vlaLow: 14, vlaHigh: 19, roll: 1.03, apexBase: 92, apexSpeedFactor: 0.77, carryFactor: 1.45 },
+      "f7":   { label: "F7",     smashMin: 1.27, smashMax: 1.36, vlaIdeal: 17, vlaLow: 15, vlaHigh: 20, roll: 1.025, apexBase: 101, apexSpeedFactor: 0.75, carryFactor: 1.39 },
+      "f8":   { label: "F8",     smashMin: 1.25, smashMax: 1.34, vlaIdeal: 19, vlaLow: 16, vlaHigh: 22, roll: 1.02, apexBase: 109, apexSpeedFactor: 0.73, carryFactor: 1.32 },
+      "f9":   { label: "F9",     smashMin: 1.22, smashMax: 1.31, vlaIdeal: 21, vlaLow: 18, vlaHigh: 24, roll: 1.015, apexBase: 118, apexSpeedFactor: 0.71, carryFactor: 1.24 },
+      pw:     { label: "PW",     smashMin: 1.18, smashMax: 1.28, vlaIdeal: 24, vlaLow: 20, vlaHigh: 28, roll: 1.01, apexBase: 124, apexSpeedFactor: 0.68, carryFactor: 1.12 }
     };
 
-    function classify(value, low, high) {
-      if (value < low) return "low";
-      if (value > high) return "high";
-      return "good";
+    function updateClubButtons() {
+      clubButtons.forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.club === selectedClub);
+      });
     }
 
-    function spanByState(state, goodText, lowText, highText) {
-      if (state === "good") return `<span class="good">${goodText}</span>`;
-      if (state === "low") return `<span class="warn">${lowText}</span>`;
-      return `<span class="alert">${highText}</span>`;
+    function formatLaunch(value) {
+      return Number(value).toFixed(1);
     }
 
     function update() {
       const cs = parseFloat(clubSpeed.value);
       const bs = parseFloat(ballSpeed.value);
       const la = parseFloat(launch.value);
-      const selectedClub = club.value;
-      const data = clubData[selectedClub];
+      const c = clubData[selectedClub];
 
-      clubSpeedVal.textContent = cs;
-      ballSpeedVal.textContent = bs;
-      launchVal.textContent = la;
+      clubSpeedVal.textContent = Math.round(cs);
+      ballSpeedVal.textContent = Math.round(bs);
+      launchVal.textContent = formatLaunch(la);
 
       const smash = bs / cs;
 
-      let carry = bs * data.carryFactor * 1.78;
-      carry += (cs - 95) * 0.9;
+      let carry = bs * c.carryFactor - 23;
+      carry += (cs - 89) * 0.55;
+      carry = Math.max(20, carry);
 
-      let total = carry * data.totalFactor;
-
-      const apexTarget = data.apexBase + (la - ((data.vlaMin + data.vlaMax) / 2)) * data.apexSlope;
-      let apex = apexTarget + (cs - 95) * 0.7;
-
-      carry = Math.max(30, carry);
+      let total = carry * c.roll;
       total = Math.max(carry, total);
+
+      let apex = c.apexBase + (la - c.vlaIdeal) * 5.5 + (cs - 89) * c.apexSpeedFactor;
       apex = Math.max(20, apex);
 
       carryEl.textContent = Math.round(carry);
       totalEl.textContent = Math.round(total);
       apexEl.textContent = Math.round(apex);
+      smashEl.textContent = smash.toFixed(2);
 
-      const smashState =
-        smash >= data.smashIdeal - 0.04 && smash <= data.smashMax
-          ? "good"
-          : smash < data.smashIdeal - 0.04
-          ? "low"
-          : "high";
-
-      commentSmash.innerHTML =
-        `Smash factor : <strong>${smash.toFixed(2)}</strong> — ` +
-        spanByState(smashState, "bon transfert d’énergie", "contact possiblement moins efficace", "valeur élevée, à valider");
-
-      const launchState = classify(la, data.vlaMin, data.vlaMax);
-      commentLaunch.innerHTML =
-        `Lancement : ` +
-        spanByState(launchState, `zone cohérente pour ce bâton (${data.vlaMin}° à ${data.vlaMax}°)`, "un peu bas pour ce bâton", "un peu haut pour ce bâton");
-
-      const apexMin = data.apexBase - 10;
-      const apexMax = data.apexBase + 12;
-      const apexState = classify(apex, apexMin, apexMax);
-      commentApex.innerHTML =
-        `Apex : ` +
-        spanByState(apexState, "trajectoire crédible", "vol plus tendu que prévu", "vol plus haut que prévu");
-
-      let generalState = "good";
-      let generalText = "Profil global très cohérent pour ce bâton.";
-
-      if (smashState === "low") {
-        generalState = "warn";
-        generalText = "Bon point de départ, mais l’efficacité de contact pourrait limiter la distance.";
-      } else if (launchState !== "good") {
-        generalState = "warn";
-        generalText = "Le VLA semble être la variable principale à surveiller ici.";
-      } else if (smashState === "high" || apexState === "high") {
-        generalState = "alert";
-        generalText = "Profil à valider avec des données terrain.";
+      let vlaMsg = "";
+      if (la < c.vlaLow) {
+        vlaMsg = `VLA un peu bas pour ${c.label}. Tu es sous la fenêtre idéale autour de ${c.vlaIdeal}°.`;
+      } else if (la > c.vlaHigh) {
+        vlaMsg = `VLA un peu haut pour ${c.label}. Tu es au-dessus de la fenêtre idéale autour de ${c.vlaIdeal}°.`;
+      } else {
+        vlaMsg = `Très bon VLA pour ${c.label}. Tu es proche de la fenêtre idéale autour de ${c.vlaIdeal}°.`;
       }
 
-      const generalClass = generalState === "good" ? "good" : generalState === "warn" ? "warn" : "alert";
-      commentGeneral.innerHTML = `Lecture générale : <span class="${generalClass}">${generalText}</span>`;
+      let smashMsg = "";
+      if (smash < c.smashMin) {
+        smashMsg = `Smash plutôt faible (${smash.toFixed(2)}) pour ${c.label}. Les données suggèrent un contact moins efficace ou une balle peu centrée.`;
+      } else if (smash > c.smashMax) {
+        smashMsg = `Smash élevé (${smash.toFixed(2)}) pour ${c.label}. Valeur intéressante, mais à valider avec prudence selon l’appareil utilisé.`;
+      } else {
+        smashMsg = `Smash cohérent (${smash.toFixed(2)}) pour ${c.label}. Les données paraissent plausibles et compatibles avec un bon centrage.`;
+      }
+
+      tip1.innerHTML = `<strong>Conseil :</strong> ${vlaMsg}`;
+      tip2.innerHTML = `<strong>Lecture du smash :</strong> ${smashMsg}`;
     }
+
+    clubButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        selectedClub = btn.dataset.club;
+        updateClubButtons();
+        update();
+      });
+    });
 
     clubSpeed.addEventListener("input", update);
     ballSpeed.addEventListener("input", update);
     launch.addEventListener("input", update);
-    club.addEventListener("change", update);
 
+    updateClubButtons();
     update();
   </script>
 </body>

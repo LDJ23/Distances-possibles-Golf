@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Analyse swing STM</title>
 
   <meta property="og:title" content="Analyse swing STM - Simulateur golf">
@@ -12,49 +12,52 @@
   <meta name="twitter:card" content="summary_large_image">
 
   <style>
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+      background:
+        linear-gradient(180deg, rgba(8,46,24,0.96) 0%, rgba(18,82,45,0.95) 38%, rgba(201,160,74,0.18) 100%);
       color: #f8fafc;
+      padding: 14px;
     }
 
-    .app {
-      width: 100%;
+    .container {
       max-width: 430px;
       margin: 0 auto;
-      min-height: 100vh;
-      padding: 14px 12px 18px;
     }
 
     .card {
-      background: rgba(30, 41, 59, 0.95);
-      border: 1px solid rgba(148, 163, 184, 0.14);
-      border-radius: 18px;
-      padding: 14px 12px;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 20px;
+      padding: 14px;
+      box-shadow: 0 10px 26px rgba(0,0,0,0.25);
     }
 
-    .title {
-      font-size: 1.15rem;
-      font-weight: 800;
+    h1 {
+      margin: 0 0 10px;
       text-align: center;
-      margin: 0 0 12px;
-      letter-spacing: 0.2px;
+      font-size: 1.35rem;
+      color: #f7e7b6;
+      letter-spacing: 0.3px;
     }
 
-    .control {
-      margin-bottom: 12px;
+    .mode-emploi {
+      background: rgba(255,255,255,0.10);
+      border-left: 4px solid #eab308;
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      font-size: 0.9rem;
+      line-height: 1.35;
+      color: #fefce8;
     }
 
-    .control:last-of-type {
-      margin-bottom: 10px;
+    .slider-group {
+      margin-bottom: 14px;
     }
 
     .label-row {
@@ -65,28 +68,32 @@
       gap: 10px;
     }
 
-    .label {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #e2e8f0;
+    .label-row label {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #f8fafc;
     }
 
-    .inline-value {
-      font-size: 0.9rem;
+    .value-box {
       font-weight: 800;
-      color: #fb923c;
-      white-space: nowrap;
+      font-size: 0.95rem;
+      color: #14532d;
+      background: #facc15;
+      padding: 4px 10px;
+      border-radius: 999px;
+      min-width: 74px;
+      text-align: center;
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,0.08);
     }
 
     input[type="range"] {
       width: 100%;
       appearance: none;
       -webkit-appearance: none;
-      height: 6px;
+      height: 8px;
       border-radius: 999px;
-      background: #334155;
+      background: linear-gradient(90deg, #86efac, #facc15);
       outline: none;
-      margin: 0;
     }
 
     input[type="range"]::-webkit-slider-thumb {
@@ -95,105 +102,150 @@
       width: 22px;
       height: 22px;
       border-radius: 50%;
-      background: #f97316;
-      border: 2px solid #fff;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+      background: #ffffff;
+      border: 3px solid #166534;
       cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
     }
 
     input[type="range"]::-moz-range-thumb {
       width: 22px;
       height: 22px;
       border-radius: 50%;
-      background: #f97316;
-      border: 2px solid #fff;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+      background: #ffffff;
+      border: 3px solid #166534;
       cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
     }
 
     select {
       width: 100%;
-      border: none;
-      outline: none;
-      border-radius: 12px;
       padding: 11px 12px;
-      font-size: 0.95rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.12);
+      color: white;
+      font-size: 0.96rem;
       font-weight: 700;
-      background: #0f172a;
-      color: #f8fafc;
-      border: 1px solid rgba(148, 163, 184, 0.16);
+      margin-bottom: 14px;
+    }
+
+    option {
+      color: black;
     }
 
     .results {
-      margin-top: 12px;
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 8px;
+      gap: 10px;
+      margin-bottom: 14px;
     }
 
     .result-box {
-      background: #0f172a;
+      background: linear-gradient(135deg, rgba(250,204,21,0.18), rgba(255,255,255,0.08));
+      border: 1px solid rgba(255,255,255,0.14);
       border-radius: 14px;
-      padding: 11px 12px;
-      border: 1px solid rgba(148, 163, 184, 0.12);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding: 12px;
     }
 
-    .result-label {
-      font-size: 0.92rem;
+    .result-title {
+      font-size: 0.84rem;
+      color: #dcfce7;
+      margin-bottom: 4px;
       font-weight: 700;
-      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
     }
 
     .result-value {
-      font-size: 1.02rem;
+      font-size: 1.45rem;
       font-weight: 900;
-      color: #fb923c;
+      color: #fef3c7;
+    }
+
+    .comments {
+      margin-top: 10px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .comments h2 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      color: #f7e7b6;
+    }
+
+    .comment-line {
+      font-size: 0.9rem;
+      line-height: 1.38;
+      margin-bottom: 7px;
+      color: #f8fafc;
+    }
+
+    .comment-line:last-child {
+      margin-bottom: 0;
+    }
+
+    .badge-good {
+      color: #bbf7d0;
+      font-weight: 800;
+    }
+
+    .badge-warn {
+      color: #fde68a;
+      font-weight: 800;
+    }
+
+    .badge-alert {
+      color: #fecaca;
+      font-weight: 800;
     }
 
     .credits {
-      margin-top: 10px;
       text-align: center;
-      font-size: 0.72rem;
-      color: #94a3b8;
-      opacity: 0.95;
+      margin-top: 12px;
+      font-size: 0.74rem;
+      color: #d1d5db;
     }
   </style>
 </head>
 <body>
-  <div class="app">
+  <div class="container">
     <div class="card">
-      <h1 class="title">Analyse swing STM</h1>
+      <h1>Analyse swing STM</h1>
 
-      <div class="control">
-        <div class="label-row">
-          <div class="label">Club Speed</div>
-          <div class="inline-value"><span id="clubSpeedVal">95</span> mph</div>
-        </div>
-        <input type="range" id="clubSpeed" min="60" max="120" value="95" />
+      <div class="mode-emploi">
+        <strong>Mode d’emploi :</strong> ajuste la vitesse de swing, la vitesse de balle, le VLA et le bâton. L’outil estime ensuite le <strong>carry</strong>, la distance <strong>totale</strong> et l’<strong>apex</strong>. Lis les commentaires en bas pour voir si les valeurs semblent optimales ou à surveiller.
       </div>
 
-      <div class="control">
+      <div class="slider-group">
         <div class="label-row">
-          <div class="label">Ball Speed</div>
-          <div class="inline-value"><span id="ballSpeedVal">140</span> mph</div>
+          <label for="clubSpeed">Club Speed</label>
+          <div class="value-box"><span id="clubSpeedVal">95</span> mph</div>
         </div>
-        <input type="range" id="ballSpeed" min="80" max="190" value="140" />
+        <input type="range" id="clubSpeed" min="60" max="120" value="95">
       </div>
 
-      <div class="control">
+      <div class="slider-group">
         <div class="label-row">
-          <div class="label">Launch Angle (VLA)</div>
-          <div class="inline-value"><span id="launchVal">14</span>°</div>
+          <label for="ballSpeed">Ball Speed</label>
+          <div class="value-box"><span id="ballSpeedVal">140</span> mph</div>
         </div>
-        <input type="range" id="launch" min="5" max="25" value="14" />
+        <input type="range" id="ballSpeed" min="80" max="190" value="140">
       </div>
 
-      <div class="control">
+      <div class="slider-group">
         <div class="label-row">
-          <div class="label">Club</div>
+          <label for="launch">Launch Angle (VLA)</label>
+          <div class="value-box"><span id="launchVal">14</span>°</div>
+        </div>
+        <input type="range" id="launch" min="5" max="30" value="14">
+      </div>
+
+      <div class="slider-group">
+        <div class="label-row">
+          <label for="club">Bâton</label>
         </div>
         <select id="club">
           <option value="driver">Driver</option>
@@ -201,26 +253,37 @@
           <option value="7w">7 Wood</option>
           <option value="4h">4 Hybrid</option>
           <option value="5i">5 Iron</option>
+          <option value="6i">6 Iron</option>
           <option value="7i">7 Iron</option>
+          <option value="8i">8 Iron</option>
+          <option value="9i">9 Iron</option>
           <option value="pw">PW</option>
         </select>
       </div>
 
       <div class="results">
         <div class="result-box">
-          <div class="result-label">Carry</div>
+          <div class="result-title">Carry</div>
           <div class="result-value"><span id="carry">0</span> verges</div>
         </div>
 
         <div class="result-box">
-          <div class="result-label">Total</div>
+          <div class="result-title">Distance totale</div>
           <div class="result-value"><span id="total">0</span> verges</div>
         </div>
 
         <div class="result-box">
-          <div class="result-label">Apex</div>
+          <div class="result-title">Apex</div>
           <div class="result-value"><span id="apex">0</span> pieds</div>
         </div>
+      </div>
+
+      <div class="comments">
+        <h2>Commentaires</h2>
+        <div class="comment-line" id="commentSmash">Smash factor : —</div>
+        <div class="comment-line" id="commentLaunch">Lancement : —</div>
+        <div class="comment-line" id="commentApex">Apex : —</div>
+        <div class="comment-line" id="commentGeneral">Lecture générale : —</div>
       </div>
 
       <div class="credits">Crédits: Louis-Daniel Joly</div>
@@ -241,35 +304,116 @@
     const totalEl = document.getElementById("total");
     const apexEl = document.getElementById("apex");
 
+    const commentSmash = document.getElementById("commentSmash");
+    const commentLaunch = document.getElementById("commentLaunch");
+    const commentApex = document.getElementById("commentApex");
+    const commentGeneral = document.getElementById("commentGeneral");
+
+    const clubData = {
+      driver: { carryFactor: 1.00, totalFactor: 1.15, apexBase: 90, apexSlope: 2.0, vlaMin: 10, vlaMax: 16, smashIdeal: 1.45, smashMax: 1.52 },
+      "3w":   { carryFactor: 0.93, totalFactor: 1.12, apexBase: 82, apexSlope: 1.8, vlaMin: 11, vlaMax: 16, smashIdeal: 1.43, smashMax: 1.50 },
+      "7w":   { carryFactor: 0.85, totalFactor: 1.08, apexBase: 90, apexSlope: 1.6, vlaMin: 13, vlaMax: 18, smashIdeal: 1.42, smashMax: 1.49 },
+      "4h":   { carryFactor: 0.82, totalFactor: 1.07, apexBase: 82, apexSlope: 1.5, vlaMin: 12, vlaMax: 17, smashIdeal: 1.40, smashMax: 1.48 },
+      "5i":   { carryFactor: 0.78, totalFactor: 1.05, apexBase: 78, apexSlope: 1.4, vlaMin: 13, vlaMax: 18, smashIdeal: 1.38, smashMax: 1.46 },
+      "6i":   { carryFactor: 0.75, totalFactor: 1.04, apexBase: 82, apexSlope: 1.35, vlaMin: 14, vlaMax: 19, smashIdeal: 1.36, smashMax: 1.45 },
+      "7i":   { carryFactor: 0.72, totalFactor: 1.03, apexBase: 86, apexSlope: 1.3, vlaMin: 15, vlaMax: 20, smashIdeal: 1.33, smashMax: 1.42 },
+      "8i":   { carryFactor: 0.69, totalFactor: 1.02, apexBase: 90, apexSlope: 1.25, vlaMin: 16, vlaMax: 21, smashIdeal: 1.30, smashMax: 1.40 },
+      "9i":   { carryFactor: 0.65, totalFactor: 1.01, apexBase: 94, apexSlope: 1.2, vlaMin: 17, vlaMax: 23, smashIdeal: 1.28, smashMax: 1.38 },
+      pw:     { carryFactor: 0.60, totalFactor: 1.00, apexBase: 98, apexSlope: 1.15, vlaMin: 19, vlaMax: 26, smashIdeal: 1.24, smashMax: 1.35 }
+    };
+
+    function classify(value, low, high) {
+      if (value < low) return "low";
+      if (value > high) return "high";
+      return "good";
+    }
+
+    function badgeText(state, goodText, lowText, highText) {
+      if (state === "good") return `<span class="badge-good">${goodText}</span>`;
+      if (state === "low") return `<span class="badge-warn">${lowText}</span>`;
+      return `<span class="badge-alert">${highText}</span>`;
+    }
+
     function update() {
       const cs = parseFloat(clubSpeed.value);
       const bs = parseFloat(ballSpeed.value);
       const la = parseFloat(launch.value);
       const selectedClub = club.value;
+      const data = clubData[selectedClub];
 
       clubSpeedVal.textContent = cs;
       ballSpeedVal.textContent = bs;
       launchVal.textContent = la;
 
-      let carry = (bs * bs * Math.sin((2 * la * Math.PI) / 180)) / 32;
+      const smash = bs / cs;
 
-      const multiplier = {
-        driver: 1,
-        "3w": 0.95,
-        "7w": 0.90,
-        "4h": 0.88,
-        "5i": 0.85,
-        "7i": 0.80,
-        "pw": 0.70
-      }[selectedClub];
+      let carry = bs * data.carryFactor * 1.78;
+      let total = carry * data.totalFactor;
 
-      carry = carry * multiplier;
-      const total = carry * 1.15;
-      const apex = Math.pow(bs * Math.sin((la * Math.PI) / 180), 2) / 64;
+      const speedAdjustment = (cs - 95) * 0.9;
+      carry += speedAdjustment;
+
+      const apexTarget = data.apexBase + (la - ((data.vlaMin + data.vlaMax) / 2)) * data.apexSlope;
+      let apex = apexTarget + (cs - 95) * 0.7;
+
+      carry = Math.max(30, carry);
+      total = Math.max(carry, total);
+      apex = Math.max(20, apex);
 
       carryEl.textContent = Math.round(carry);
       totalEl.textContent = Math.round(total);
       apexEl.textContent = Math.round(apex);
+
+      const smashState =
+        smash >= data.smashIdeal - 0.04 && smash <= data.smashMax
+          ? "good"
+          : smash < data.smashIdeal - 0.04
+          ? "low"
+          : "high";
+
+      commentSmash.innerHTML =
+        `Smash factor : <strong>${smash.toFixed(2)}</strong> — ` +
+        badgeText(
+          smashState,
+          "bon transfert d’énergie",
+          "contact possiblement moins efficace",
+          "valeur élevée, à valider"
+        );
+
+      const launchState = classify(la, data.vlaMin, data.vlaMax);
+      commentLaunch.innerHTML =
+        `Lancement : ` +
+        badgeText(
+          launchState,
+          `zone cohérente pour ce bâton (${data.vlaMin}° à ${data.vlaMax}°)`,
+          `un peu bas pour ce bâton`,
+          `un peu haut pour ce bâton`
+        );
+
+      const apexMin = data.apexBase - 10;
+      const apexMax = data.apexBase + 12;
+      const apexState = classify(apex, apexMin, apexMax);
+      commentApex.innerHTML =
+        `Apex : ` +
+        badgeText(
+          apexState,
+          `trajectoire crédible`,
+          `vol plus tendu que prévu`,
+          `vol plus haut que prévu`
+        );
+
+      let general = "";
+      if (smashState === "good" && launchState === "good" && apexState === "good") {
+        general = `<span class="badge-good">Profil global très cohérent pour ce bâton.</span>`;
+      } else if (smashState === "low") {
+        general = `<span class="badge-warn">Bon point de départ, mais l’efficacité de contact pourrait limiter la distance.</span>`;
+      } else if (launchState !== "good") {
+        general = `<span class="badge-warn">Le VLA semble être la variable principale à surveiller ici.</span>`;
+      } else {
+        general = `<span class="badge-alert">Profil à interpréter avec prudence : certaines valeurs méritent validation terrain.</span>`;
+      }
+
+      commentGeneral.innerHTML = `Lecture générale : ${general}`;
     }
 
     clubSpeed.addEventListener("input", update);
